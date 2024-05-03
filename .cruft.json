@@ -1,0 +1,30 @@
+{
+  "template": "https://github.com/waynerv/cookiecutter-pypackage.git",
+  "commit": "f94e6534590f49b079f91aef31666faa217a53e6",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "GuiAgentLoopCore",
+      "project_slug": "GuiAgentLoopCore",
+      "pkg_name": "gui_agent_loop_core",
+      "project_short_description": "Core logic of GUI and LLM agent bridge, including loop and controls.",
+      "full_name": "Daisuke Jinno",
+      "email": "klvx01@gmail.com",
+      "github_username": "nobu007",
+      "version": "0.1.0",
+      "command_line_interface": "Click",
+      "open_source_license": "MIT",
+      "docstrings_style": "google",
+      "use_mypy": "y",
+      "install_precommit_hooks": "y",
+      "_copy_without_render": [
+        "docs/changelog.md",
+        "docs/contributing.md",
+        "docs/index.md",
+        ".github/workflows/*.yml"
+      ],
+      "_template": "https://github.com/waynerv/cookiecutter-pypackage.git"
+    }
+  },
+  "directory": null
+}
