@@ -30,31 +30,37 @@ help:
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
-	rm -fr build/
-	rm -fr dist/
-	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
+	rm -rf build/
+	rm -rf dist/
+	rm -rf .eggs/
+	find . -name '*.egg-info' -exec rm -rf {} +
 	find . -name '*.egg' -exec rm -f {} +
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
+	find . -name '__pycache__' -exec rm -rf {} +
 
 clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-	rm -fr .pytest_cache
+	rm -rf .tox/
+	rm -rf .coverage coverage.xml
+	rm -rf htmlcov/
+	rm -rf .pytest_cache
+	rm -rf .mypy_cache
 
 lint/flake8: ## check style with flake8
 	flake8 GuiAgentLoopCore tests
 
 
 lint: lint/flake8 ## check style
+	flake8 $(sources) tests
+	mypy $(sources) tests
 
-test: ## run tests quickly with the default Python
+test: ## run tests full
+	pytest
+
+unittest: ## run tests quickly with the default Python
 	pytest
 
 test-all: ## run tests on every Python version with tox
@@ -87,3 +93,13 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+format: ## style
+	isort $(sources) tests
+	black $(sources) tests
+
+py-coverage:
+	pytest --cov=$(sources) --cov-branch --cov-report=term-missing tests
+
+pre-commit:
+	pre-commit run --all-files
