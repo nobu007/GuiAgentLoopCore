@@ -2,11 +2,10 @@ import asyncio
 import time
 import traceback
 
+from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.messages.base import BaseMessage
-
-from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
 
 def convert_messages(langchain_messages: list[BaseMessage]):
@@ -57,7 +56,9 @@ def process_messages_gradio(
 
         if last_user_message_content != new_query:
             # is_auto=Trueの場合はここを通る
-            if not is_last_user_message_content_remain(last_user_message_content, converted_messages):
+            if not is_last_user_message_content_remain(
+                last_user_message_content, converted_messages
+            ):
                 # ユーザ入力を忘れたので追加する
                 last_user_message = {
                     "role": "user",
