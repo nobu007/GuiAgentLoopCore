@@ -1,39 +1,76 @@
 import enum
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union, get_args
+from typing import Any, AsyncGenerator, Dict, Generator, Generic, List, Optional, Type, TypeVar, Union, get_args
 
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.memory.chat_memory import BaseChatMessageHistory
 from pydantic import BaseModel, Field, model_validator, validate_call
 
 
-class ChatMessage(BaseModel):
+class GuiAgentInterpreterChatMessage(BaseModel):
+    class Type(str, enum.Enum):
+        MESSAGE = "message"
+        CODE = "code"
+        CONFIRMATION = "confirmation"
+        CONSOLE = "console"
+        IMAGE = "image"
+        # TODO: fix
+
+        """May be used for the result of tool calls"""
+        FUNCTION = "function"
+        """May be used for the return value of function calls"""
+
     class Role(str, enum.Enum):
         USER = "user"
         SYSTEM = "system"
         ASSISTANT = "assistant"
 
+        # TODO: fix
         TOOL = "tool"
         """May be used for the result of tool calls"""
         FUNCTION = "function"
         """May be used for the return value of function calls"""
 
-    role: Role
-    content: str
+    type: Type = Type.MESSAGE
+    role: Role = Role.USER
+    content: str = ""
 
     @staticmethod
-    def user(content: str) -> "ChatMessage":
-        return ChatMessage(role=ChatMessage.Role.USER, content=content)
+    def user(content: str) -> "GuiAgentInterpreterChatMessage":
+        return GuiAgentInterpreterChatMessage(role=GuiAgentInterpreterChatMessage.Role.USER, content=content)
 
     @staticmethod
-    def system(content: str) -> "ChatMessage":
-        return ChatMessage(role=ChatMessage.Role.SYSTEM, content=content)
+    def system(content: str) -> "GuiAgentInterpreterChatMessage":
+        return GuiAgentInterpreterChatMessage(role=GuiAgentInterpreterChatMessage.Role.SYSTEM, content=content)
 
 
-ChatMessagesAny = Union[str, ChatMessage, list[ChatMessage]]
-ChatMessagesFix = list[ChatMessage]
-ChatMessages = Union[ChatMessage, list[ChatMessage]]
+class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
+    class Format(str, enum.Enum):
+        ACTIVE_LINE = "active_line"
+        OUTPUT = "output"
+        BASE64_PNG = "base64.png"
+        # TODO: fix
+
+    format: Optional[Format] = Format.OUTPUT
+    code: Optional[str] = ""  # working change(may nothing set)
+    start: Optional[bool] = False  # indicate first frame of chunks
+    end: Optional[bool] = False  # indicate last frame of chunks
+
+
+GuiAgentInterpreterChatMessages = Union[GuiAgentInterpreterChatMessage, List[GuiAgentInterpreterChatMessage]]
+GuiAgentInterpreterChatMessagesAny = Union[str, GuiAgentInterpreterChatMessage, List[GuiAgentInterpreterChatMessage]]
+GuiAgentInterpreterChatMessageList = List[GuiAgentInterpreterChatMessage]
+GuiAgentInterpreterChatResponseGenerator = Generator[GuiAgentInterpreterChatResponse, None, None]
+GuiAgentInterpreterChatResponseAny = Union[
+    GuiAgentInterpreterChatResponse, Generator[GuiAgentInterpreterChatResponse, None, None], AsyncGenerator[str, None]
+]
+GuiAgentInterpreterChatResponseAnyAsync = Union[
+    GuiAgentInterpreterChatResponse,
+    AsyncGenerator[GuiAgentInterpreterChatResponse, None],
+]
+GuiAgentInterpreterChatResponseStr = Union[str, Generator[str, None, None]]
+GuiAgentInterpreterChatResponseStrAsync = Union[str, AsyncGenerator[str, None]]
 
 
 class InterpreterState(str, enum.Enum):
@@ -46,28 +83,136 @@ class GuiAgentInterpreterABC(ABC):
     @validate_call
     @abstractmethod
     def chat(
-        self, message: ChatMessages, display: bool = False, stream: bool = False, blocking: bool = False
-    ) -> ChatMessages:
+        self,
+        message: GuiAgentInterpreterChatMessages,
+        display: bool = False,
+        stream: bool = False,
+        blocking: bool = False,
+    ) -> GuiAgentInterpreterChatResponseAny:
         pass
 
 
 class GuiAgentInterpreterBase(GuiAgentInterpreterABC):
     def chat(
-        self, message: ChatMessages, display: bool = False, stream: bool = False, blocking: bool = False
-    ) -> ChatMessages:
-        return message
-
-
-class GuiAgentInterpreterSampleNG:
-    def chat(self, message: str, display: bool = False, stream: bool = False, blocking: bool = False) -> ChatMessages:
-        return message
+        self,
+        message: GuiAgentInterpreterChatMessages,
+        display: bool = False,
+        stream: bool = False,
+        blocking: bool = False,
+    ) -> GuiAgentInterpreterChatResponseAny:
+        response = GuiAgentInterpreterChatResponse()
+        return response
 
 
 class GuiAgentInterpreterSampleOK:
     def chat(
-        self, message: ChatMessages, display: bool = False, stream: bool = False, blocking: bool = False
-    ) -> ChatMessages:
-        return message
+        self,
+        message: GuiAgentInterpreterChatMessages,
+        display: bool = False,
+        stream: bool = False,
+        blocking: bool = False,
+    ) -> GuiAgentInterpreterChatResponseAny:
+        response = GuiAgentInterpreterChatResponse()
+        return response
+
+
+class GuiAgentInterpreterSamplePramNG:
+    def chat(
+        self, message: str, display: bool = False, stream: bool = False, blocking: bool = False
+    ) -> GuiAgentInterpreterChatResponseAny:
+        response = GuiAgentInterpreterChatResponse()
+        return response
+
+
+class GuiAgentInterpreterSampleReturnNG:
+    def chat(
+        self,
+        message: GuiAgentInterpreterChatMessages,
+        display: bool = False,
+        stream: bool = False,
+        blocking: bool = False,
+    ) -> str:
+        return ""
+
+
+import inspect
+from typing import List, Optional, get_args, get_origin
+
+
+def validate_parameter_signature(
+    expected_params: List[inspect.Parameter], actual_params: List[inspect.Parameter], method_name: str
+):
+    """
+    Validates the parameter signatures of a method.
+
+    Args:
+        expected_params: The expected parameters from the abstract base class.
+        actual_params: The actual parameters from the object's method.
+        method_name: The name of the method being validated.
+
+    Raises:
+        ValueError: If the number of parameters does not match, or the parameter names and annotations do not match.
+    """
+    # Check if the number of parameters matches
+    if len(expected_params) != len(actual_params):
+        raise ValueError(
+            f'Object.{method_name} has an incompatible number of parameters. Expected: {len(expected_params)}, Actual: {len(actual_params)}'
+        )
+
+    # Check if the parameter names and annotations match
+    for expected_param, actual_param in zip(expected_params, actual_params):
+        if expected_param.name != actual_param.name:
+            raise ValueError(
+                f'Object.{method_name} has an incompatible parameter name. Expected: {expected_param.name}, Actual: {actual_param.name}'
+            )
+
+        expected_annotation = expected_param.annotation
+        actual_annotation = actual_param.annotation
+
+        if expected_annotation is inspect.Parameter.empty or actual_annotation is inspect.Parameter.empty:
+            continue
+
+        # Check if the expected annotation is Optional
+        expected_is_optional = get_origin(expected_annotation) is Optional
+
+        if expected_is_optional:
+            # If the expected annotation is Optional, compare the inner type with the actual annotation
+            expected_inner_type = get_args(expected_annotation)[0]
+            if expected_inner_type != actual_annotation:
+                raise ValueError(
+                    f'Object.{method_name} parameter "{expected_param.name}" has an incompatible type annotation. Expected: {expected_annotation}, Actual: {actual_annotation}'
+                )
+        else:
+            # If the expected annotation is not Optional, compare the annotations directly
+            if expected_annotation != actual_annotation:
+                raise ValueError(
+                    f'Object.{method_name} parameter "{expected_param.name}" has an incompatible type annotation. Expected: {expected_annotation}, Actual: {actual_annotation}'
+                )
+
+
+def validate_return_signature(
+    expected_signature: inspect.Signature, actual_signature: inspect.Signature, method_name: str
+):
+    """
+    Validates the return signature of a method.
+
+    Args:
+        expected_signature: The expected signature from the abstract base class.
+        actual_signature: The actual signature from the object's method.
+        method_name: The name of the method being validated.
+
+    Raises:
+        ValueError: If the return annotation does not match.
+    """
+    expected_return_annotation = expected_signature.return_annotation
+    actual_return_annotation = actual_signature.return_annotation
+
+    if expected_return_annotation != actual_return_annotation:
+        if expected_return_annotation is inspect.Signature.empty or actual_return_annotation is inspect.Signature.empty:
+            return
+        raise ValueError(
+            f'Object.{method_name} has an incompatible return annotation. Expected: {expected_return_annotation}, Actual: {actual_return_annotation}'
+        )
 
 
 def validate_method_signature(obj: Any, abc_class: Type, method_name: str):
@@ -81,7 +226,7 @@ def validate_method_signature(obj: Any, abc_class: Type, method_name: str):
 
     Raises:
         ValueError: If the object does not have the specified method, the method is not callable,
-                    the number of parameters does not match, or the parameter names and annotations do not match.
+                    the parameter signatures do not match, or the return signature does not match.
     """
     if not hasattr(obj, method_name):
         raise ValueError(f'Object must have a {method_name} method')
@@ -105,28 +250,11 @@ def validate_method_signature(obj: Any, abc_class: Type, method_name: str):
     if actual_params[0].name == 'self':
         actual_params = actual_params[1:]
 
-    # Check if the number of parameters matches
-    if len(expected_params) != len(actual_params):
-        raise ValueError(
-            f'Object.{method_name} has an incompatible number of parameters. Expected: {len(expected_params)}, Actual: {len(actual_params)}'
-        )
+    # Validate the parameter signatures
+    validate_parameter_signature(expected_params, actual_params, method_name)
 
-    # Check if the parameter names and annotations match
-    for expected_param, actual_param in zip(expected_params, actual_params):
-        if expected_param.name != actual_param.name:
-            raise ValueError(
-                f'Object.{method_name} has an incompatible parameter name. Expected: {expected_param.name}, Actual: {actual_param.name}'
-            )
-
-        if expected_param.annotation != actual_param.annotation:
-            if (
-                expected_param.annotation is inspect.Parameter.empty
-                or actual_param.annotation is inspect.Parameter.empty
-            ):
-                continue
-            raise ValueError(
-                f'Object.{method_name} parameter "{expected_param.name}" has an incompatible type annotation. Expected: {expected_param.annotation}, Actual: {actual_param.annotation}'
-            )
+    # Validate the return signature
+    validate_return_signature(expected_signature, actual_signature, method_name)
 
 
 class GuiAgentInterpreterManagerBase(BaseModel):
@@ -171,8 +299,10 @@ class GuiAgentInterpreterManagerBase(BaseModel):
 
 
 if __name__ == "__main__":
-    interpreter_ng = GuiAgentInterpreterSampleNG()
+    # TODO: move to unittest
+    interpreter_param_ng = GuiAgentInterpreterSamplePramNG()
+    interpreter_return_ng = GuiAgentInterpreterSampleReturnNG()
     interpreter_ok = GuiAgentInterpreterSampleOK()
     manager = GuiAgentInterpreterManagerBase(interpreter_ok)
-    manager._interpreter = interpreter_ng  # This is OK. But W0212:protected-access is occur.
+    manager._interpreter = interpreter_return_ng  # This is OK. But W0212:protected-access is occur.
     print(manager)

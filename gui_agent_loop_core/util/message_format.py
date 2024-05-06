@@ -4,13 +4,18 @@ from io import BytesIO
 
 from PIL import Image
 
+from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatMessage, GuiAgentInterpreterChatResponse
 
-def format_response(chunk):
-    response = ""
-    chunk_type = chunk.get("type", "")
-    chunk_role = chunk.get("role", "")
-    chunk_start = chunk.get("start", False)
-    chunk_end = chunk.get("end", False)
+
+def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpreterChatResponse:
+    response_str = ""
+    chunk_content = chunk.content
+    chunk_type = chunk.type
+    chunk_role = chunk.role
+    chunk_format = chunk.format
+    chunk_code = chunk.code  # working change(may nothing set)
+    chunk_start = chunk.start
+    chunk_end = chunk.end
     # print(
     #     "format_response chunk_type=",
     #     chunk_type,
@@ -22,49 +27,58 @@ def format_response(chunk):
     #     chunk_end,
     # )
     # Message
-    if chunk_type == "message":
-        response += chunk.get("content", "")
+    if chunk_type == GuiAgentInterpreterChatMessage.Type.MESSAGE:
+        response_str = chunk_content
         if chunk_end:
-            response += "\n"
+            response_str += "\n"
 
     # Code
-    if chunk_type == "code":
+    if chunk_type == GuiAgentInterpreterChatMessage.Type.CODE:
         if chunk_start:
-            response += "```python\n"
-        response += chunk.get("content", "")
+            response_str += "```python\n"
+        if chunk_code:
+            response_str += chunk_code
+        elif chunk_content:
+            # code may in chunk_content
+            response_str += chunk_content
         if chunk_end:
-            response += "\n```\n"
+            response_str += "\n```\n"
 
     # Output
-    if chunk_type == "confirmation":
+    if chunk_type == GuiAgentInterpreterChatMessage.Type.CONFIRMATION:
         if chunk_start:
-            response += "```python\n"
-        response += chunk.get("content", {}).get("code", "")
+            response_str += "```python\n"
+        # TODO: fix CONFIRMATION format
+        print("format_response CONFIRMATION chunk_content=", chunk_content)
+        if chunk_content:
+            response_str += chunk_content
+        elif chunk_code:
+            response_str += chunk_code
         if chunk_end:
-            response += "```\n"
+            response_str += "```\n"
 
     # Console
-    if chunk_type == "console":
+    if chunk_type == GuiAgentInterpreterChatMessage.Type.CONSOLE:
         if chunk_start:
-            response += "```python\n"
-        if chunk.get("format", "") == "active_line":
-            console_content = chunk.get("content", "")
+            response_str += "```python\n"
+        if chunk_format == "active_line":
+            console_content = chunk_content
             if console_content is None:
-                response += "No output available on console."
+                response_str += "No output available on console."
         if chunk.get("format", "") == "output":
-            console_content = chunk.get("content", "")
-            response += console_content
+            console_content = chunk_content
+            response_str += console_content
         if chunk_end:
-            response += "\n```\n"
+            response_str += "\n```\n"
 
     # Image
-    if chunk_type == "image":
+    if chunk_type == GuiAgentInterpreterChatMessage.Type.IMAGE:
         if chunk_start or chunk_end:
-            response += "\n"
+            response_str += "\n"
         else:
-            image_format = chunk.get("format", "")
-            if image_format == "base64.png":
-                image_content = chunk.get("content", "")
+            image_format = chunk_format
+            if image_format == GuiAgentInterpreterChatResponse.Format.BASE64_PNG:
+                image_content = chunk_content
                 if image_content:
                     image = Image.open(BytesIO(base64.b64decode(image_content)))
                     new_image = Image.new("RGB", image.size, "white")
@@ -72,9 +86,15 @@ def format_response(chunk):
                     buffered = BytesIO()
                     new_image.save(buffered, format="PNG")
                     img_str = base64.b64encode(buffered.getvalue()).decode()
-                    response += f"![Image](data:image/png;base64,{img_str})\n"
+                    response_str += f"![Image](data:image/png;base64,{img_str})\n"
 
-    return response, chunk_type, chunk_role, chunk_start, chunk_end
+    response = GuiAgentInterpreterChatResponse()
+    response.content = response_str
+    response.role = chunk_role
+    response.code = chunk_code
+    response.start = chunk_start
+    response.end = chunk_end
+    return response
 
 
 def show_data_debug(data, name: str):

@@ -1,6 +1,6 @@
 import gradio as gr
+
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
-from langchain.memory import ConversationBufferWindowMemory
 
 STATE_INIT = "init"
 STATE_RUNNING = "running"
@@ -58,17 +58,11 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
             outputs=[output_block],
             every=10,  # every:sec
         )
-        app.load(
-            fn=interpreter_manager.update_state_view, outputs=[state_label], every=3
-        )
+        app.load(fn=interpreter_manager.update_state_view, outputs=[state_label], every=3)
 
         # イベントチェイン(ボタンを押したらRUNNINGにする)
-        chat_iface.textbox.submit(
-            fn=interpreter_manager.change_state_running, outputs=[state_label]
-        )
-        chat_iface.submit_btn.click(
-            fn=interpreter_manager.change_state_running, outputs=[state_label]
-        )
+        chat_iface.textbox.submit(fn=interpreter_manager.change_state_running, outputs=[state_label])
+        chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[state_label])
 
         # イベントチェイン(chatbotが終わったらSTOPにする)
         # chatbot.change(
