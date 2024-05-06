@@ -6,13 +6,13 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.messages.base import BaseMessage
 
 from gui_agent_loop_core.schema.schema import (
+    GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatMessageList,
     GuiAgentInterpreterChatResponse,
     GuiAgentInterpreterChatResponseAny,
     GuiAgentInterpreterChatResponseAnyAsync,
     GuiAgentInterpreterChatResponseGenerator,
-    GuiAgentInterpreterManagerBase,
 )
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
@@ -49,7 +49,7 @@ def is_last_user_message_content_remain(last_user_message_content, converted_mes
 async def process_messages_gradio(
     last_user_message_content: str,
     new_query: str,
-    interpreter: GuiAgentInterpreterManagerBase,
+    interpreter: GuiAgentInterpreterABC,
     memory: ConversationBufferWindowMemory,
 ) -> GuiAgentInterpreterChatResponseAny:
     try:
@@ -99,11 +99,11 @@ async def process_messages_gradio(
 
 
 async def process_and_format_message(
-    message: GuiAgentInterpreterChatMessageList, interpreter: GuiAgentInterpreterManagerBase
+    message: GuiAgentInterpreterChatMessageList, interpreter: GuiAgentInterpreterABC
 ) -> GuiAgentInterpreterChatResponseAny:
     try:
         # TODO: rename message -> messages
-        response_chunks = interpreter.chat(message, display=False, stream=True)
+        response_chunks = interpreter.chat_core(message, display=False, stream=True)
         if not inspect.isasyncgen(response_chunks):
             # 同期ジェネレーターの場合
             for chunk in format_message_sync(response_chunks):

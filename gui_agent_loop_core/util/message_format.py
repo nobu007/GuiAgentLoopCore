@@ -51,9 +51,9 @@ def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpret
         # TODO: fix CONFIRMATION format
         print("format_response CONFIRMATION chunk_content=", chunk_content)
         if chunk_content:
-            response_str += chunk_content
+            response_str += str(chunk_content)
         elif chunk_code:
-            response_str += chunk_code
+            response_str += str(chunk_code)
         if chunk_end:
             response_str += "```\n"
 
@@ -65,7 +65,7 @@ def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpret
             console_content = chunk_content
             if console_content is None:
                 response_str += "No output available on console."
-        if chunk.get("format", "") == "output":
+        if chunk_format == "output":
             console_content = chunk_content
             response_str += console_content
         if chunk_end:

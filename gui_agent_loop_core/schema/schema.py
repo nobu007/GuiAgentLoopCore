@@ -82,7 +82,7 @@ class InterpreterState(str, enum.Enum):
 class GuiAgentInterpreterABC(ABC):
     @validate_call
     @abstractmethod
-    def chat(
+    def chat_core(
         self,
         message: GuiAgentInterpreterChatMessages,
         display: bool = False,
@@ -93,7 +93,7 @@ class GuiAgentInterpreterABC(ABC):
 
 
 class GuiAgentInterpreterBase(GuiAgentInterpreterABC):
-    def chat(
+    def chat_core(
         self,
         message: GuiAgentInterpreterChatMessages,
         display: bool = False,
@@ -105,7 +105,7 @@ class GuiAgentInterpreterBase(GuiAgentInterpreterABC):
 
 
 class GuiAgentInterpreterSampleOK:
-    def chat(
+    def chat_core(
         self,
         message: GuiAgentInterpreterChatMessages,
         display: bool = False,
@@ -117,7 +117,7 @@ class GuiAgentInterpreterSampleOK:
 
 
 class GuiAgentInterpreterSamplePramNG:
-    def chat(
+    def chat_core(
         self, message: str, display: bool = False, stream: bool = False, blocking: bool = False
     ) -> GuiAgentInterpreterChatResponseAny:
         response = GuiAgentInterpreterChatResponse()
@@ -125,7 +125,7 @@ class GuiAgentInterpreterSamplePramNG:
 
 
 class GuiAgentInterpreterSampleReturnNG:
-    def chat(
+    def chat_core(
         self,
         message: GuiAgentInterpreterChatMessages,
         display: bool = False,
@@ -265,7 +265,7 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     current_state: InterpreterState = InterpreterState.STATE_INIT
 
     def __init__(self, interpreter: GuiAgentInterpreterABC):
-        validate_method_signature(interpreter, GuiAgentInterpreterABC, 'chat')
+        validate_method_signature(interpreter, GuiAgentInterpreterABC, 'chat_core')
 
         super().__init__()
         self._interpreter = interpreter
