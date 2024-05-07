@@ -1,0 +1,36 @@
+graph LR
+    User((<i class="fas fa-user"></i>))---UI
+    UI --- OpenGuiConnector
+    OpenGuiConnector --- TaskAgent
+    TaskAgent --- Agent1
+    TaskAgent --- Agent2
+    Agent1 --- LLM
+    Agent2 --- LLM
+
+    subgraph Interaction_Layer
+    User((<i class="fas fa-user"></i>))
+    UI(UI)
+    end
+
+    subgraph Processing_Layer
+    OpenGuiConnector(OpenGuiConnector<br>- Event handling<br>- I/O conversion<br>- Multimodal support)
+    end
+
+    subgraph Task_Management_Layer
+    TaskAgent(TaskAgent<br>- Task decomposition<br>- Subtask prioritization<br>- Agent assignment)
+    end
+
+    subgraph Execution_Layer
+    Agent1(Agent1<br>Specialized role)
+    Agent2(Agent2<br>Specialized role)
+    end
+
+    subgraph Language_Model_Layer
+    LLM(LLM<br>Base language model)
+    end
+
+    style Interaction_Layer fill:#f9f,stroke:#333,stroke-width:2px,color:#333
+    style Processing_Layer fill:#cff,stroke:#333,stroke-width:2px,color:#333
+    style Task_Management_Layer fill:#ffc,stroke:#333,stroke-width:2px,color:#333
+    style Execution_Layer fill:#cfc,stroke:#333,stroke-width:2px,color:#333
+    style Language_Model_Layer fill:#ccf,stroke:#333,stroke-width:2px,color:#333

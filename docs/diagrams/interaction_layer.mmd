@@ -1,0 +1,18 @@
+graph LR
+    subgraph Interaction_Layer
+        GuiAgentLoopCore(gui_agent_loop_core.py)
+        GradioUI(Gradio UI)
+        OpenAPISpec(OpenAPI Specification)
+        InterpreterManager(InterpreterManager)
+        AppLogic(Application Logic)
+
+        GuiAgentLoopCore --> |Launch| GradioUI
+        GradioUI --> |User Input| InterpreterManager
+        InterpreterManager --> |Parse and Validate| OpenAPISpec
+        OpenAPISpec --> |Formatted Data| AppLogic
+        AppLogic --> |Result| OpenAPISpec
+        OpenAPISpec --> |Formatted Data| InterpreterManager
+        InterpreterManager --> |Format Response| GradioUI
+    end
+
+    style Interaction_Layer fill:#f9f,stroke:#333,stroke-width:2px,color:#333
