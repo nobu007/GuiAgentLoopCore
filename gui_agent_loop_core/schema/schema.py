@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field, model_validator, validate_call
 
 
 class GuiAgentInterpreterChatMessage(BaseModel):
+    """First message to GuiAgentInterprete"""
+
     class Type(str, enum.Enum):
         MESSAGE = "message"
         CODE = "code"
@@ -21,10 +23,17 @@ class GuiAgentInterpreterChatMessage(BaseModel):
         FUNCTION = "function"
         """May be used for the return value of function calls"""
 
+        def __str__(self):
+            return self.value
+
+        def __repr__(self):
+            return self.value
+
     class Role(str, enum.Enum):
         USER = "user"
         SYSTEM = "system"
         ASSISTANT = "assistant"
+        COMPUTER = "computer"
 
         # TODO: fix
         TOOL = "tool"
@@ -32,9 +41,15 @@ class GuiAgentInterpreterChatMessage(BaseModel):
         FUNCTION = "function"
         """May be used for the return value of function calls"""
 
-    type: Type = Type.MESSAGE
-    role: Role = Role.USER
-    content: str = ""
+        def __str__(self):
+            return self.value
+
+        def __repr__(self):
+            return self.value
+
+    type: Optional[Type] = Type.MESSAGE
+    role: Optional[Role] = Role.USER
+    content: Optional[str] = ""
 
     @staticmethod
     def user(content: str) -> "GuiAgentInterpreterChatMessage":
@@ -46,21 +61,42 @@ class GuiAgentInterpreterChatMessage(BaseModel):
 
 
 class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
+    """Response message from GuiAgentInterprete"""
+
     class Format(str, enum.Enum):
         ACTIVE_LINE = "active_line"
         OUTPUT = "output"
         BASE64_PNG = "base64.png"
+        EXECUTION = "execution"
+        PYTHON = "python"
         # TODO: fix
+
+        def __str__(self):
+            return self.value
+
+        def __repr__(self):
+            return self.value
 
     format: Optional[Format] = Format.OUTPUT
     code: Optional[str] = ""  # working change(may nothing set)
+    language: Optional[str] = ""  # working change(may nothing set)
     start: Optional[bool] = False  # indicate first frame of chunks
     end: Optional[bool] = False  # indicate last frame of chunks
 
 
+class GuiAgentInterpreterChatRequest(GuiAgentInterpreterChatResponse):
+    """Second or later message to GuiAgentInterprete
+    This class handle multi turn conversation."""
+
+
+# Naming rules
+# classList = List[class]
+# classs    = class or List[class]
+# classAny  = str or class or List[class]
+# classAny  = class or Generator or AsyncGenerator ※response only
+GuiAgentInterpreterChatMessageList = List[GuiAgentInterpreterChatMessage]
 GuiAgentInterpreterChatMessages = Union[GuiAgentInterpreterChatMessage, List[GuiAgentInterpreterChatMessage]]
 GuiAgentInterpreterChatMessagesAny = Union[str, GuiAgentInterpreterChatMessage, List[GuiAgentInterpreterChatMessage]]
-GuiAgentInterpreterChatMessageList = List[GuiAgentInterpreterChatMessage]
 GuiAgentInterpreterChatResponseGenerator = Generator[GuiAgentInterpreterChatResponse, None, None]
 GuiAgentInterpreterChatResponseAny = Union[
     GuiAgentInterpreterChatResponse, Generator[GuiAgentInterpreterChatResponse, None, None], AsyncGenerator[str, None]
@@ -69,8 +105,13 @@ GuiAgentInterpreterChatResponseAnyAsync = Union[
     GuiAgentInterpreterChatResponse,
     AsyncGenerator[GuiAgentInterpreterChatResponse, None],
 ]
-GuiAgentInterpreterChatResponseStr = Union[str, Generator[str, None, None]]
-GuiAgentInterpreterChatResponseStrAsync = Union[str, AsyncGenerator[str, None]]
+GuiAgentInterpreterChatRequestList = List[GuiAgentInterpreterChatRequest]
+GuiAgentInterpreterChatRequests = Union[GuiAgentInterpreterChatRequest, List[GuiAgentInterpreterChatRequest]]
+GuiAgentInterpreterChatRequestAny = Union[
+    str,
+    GuiAgentInterpreterChatRequest,
+    GuiAgentInterpreterChatRequestList,
+]
 
 
 class InterpreterState(str, enum.Enum):
@@ -78,13 +119,19 @@ class InterpreterState(str, enum.Enum):
     STATE_RUNNING = "running"
     STATE_STOP = "stop"
 
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
+
 
 class GuiAgentInterpreterABC(ABC):
     @validate_call
     @abstractmethod
     def chat_core(
         self,
-        message: GuiAgentInterpreterChatMessages,
+        request_core: GuiAgentInterpreterChatRequestAny,
         display: bool = False,
         stream: bool = False,
         blocking: bool = False,
@@ -95,7 +142,7 @@ class GuiAgentInterpreterABC(ABC):
 class GuiAgentInterpreterBase(GuiAgentInterpreterABC):
     def chat_core(
         self,
-        message: GuiAgentInterpreterChatMessages,
+        request_core: GuiAgentInterpreterChatRequestAny,
         display: bool = False,
         stream: bool = False,
         blocking: bool = False,
@@ -107,7 +154,7 @@ class GuiAgentInterpreterBase(GuiAgentInterpreterABC):
 class GuiAgentInterpreterSampleOK:
     def chat_core(
         self,
-        message: GuiAgentInterpreterChatMessages,
+        request_core: GuiAgentInterpreterChatRequestAny,
         display: bool = False,
         stream: bool = False,
         blocking: bool = False,
@@ -118,7 +165,7 @@ class GuiAgentInterpreterSampleOK:
 
 class GuiAgentInterpreterSamplePramNG:
     def chat_core(
-        self, message: str, display: bool = False, stream: bool = False, blocking: bool = False
+        self, request_core: str, display: bool = False, stream: bool = False, blocking: bool = False
     ) -> GuiAgentInterpreterChatResponseAny:
         response = GuiAgentInterpreterChatResponse()
         return response
@@ -127,7 +174,7 @@ class GuiAgentInterpreterSamplePramNG:
 class GuiAgentInterpreterSampleReturnNG:
     def chat_core(
         self,
-        message: GuiAgentInterpreterChatMessages,
+        request_core: GuiAgentInterpreterChatRequestAny,
         display: bool = False,
         stream: bool = False,
         blocking: bool = False,
@@ -293,7 +340,7 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     def auto_chat(self) -> str:
         return ""
 
-    class Config:
+    class ConfigDict :
         arbitrary_types_allowed = True
         validate_assignment = True
 

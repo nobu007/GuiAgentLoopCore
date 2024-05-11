@@ -9,7 +9,9 @@ from gui_agent_loop_core.schema.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatMessageList,
-    GuiAgentInterpreterChatResponse,
+    GuiAgentInterpreterChatRequest,
+    GuiAgentInterpreterChatRequestAny,
+    GuiAgentInterpreterChatRequestList,
     GuiAgentInterpreterChatResponseAny,
     GuiAgentInterpreterChatResponseAnyAsync,
     GuiAgentInterpreterChatResponseGenerator,
@@ -17,10 +19,10 @@ from gui_agent_loop_core.schema.schema import (
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
 
-def convert_messages(langchain_messages: list[BaseMessage]) -> GuiAgentInterpreterChatMessageList:
-    converted_messages = []
+def convert_messages(langchain_messages: list[BaseMessage]) -> GuiAgentInterpreterChatRequestList:
+    request_core_list = []
     for message in langchain_messages:
-        converted_message = GuiAgentInterpreterChatMessage()
+        converted_message = GuiAgentInterpreterChatRequest()
         if isinstance(message, HumanMessage):
             converted_message.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
             converted_message.role = GuiAgentInterpreterChatMessage.Role.USER
@@ -32,9 +34,9 @@ def convert_messages(langchain_messages: list[BaseMessage]) -> GuiAgentInterpret
         else:
             print("WARN: converted_messages skip unknown message type=", type(message))
             continue
-        converted_messages.append(converted_message)
+        request_core_list.append(converted_message)
 
-    return converted_messages
+    return request_core_list
 
 
 def is_last_user_message_content_remain(last_user_message_content, converted_messages):
@@ -54,39 +56,39 @@ async def process_messages_gradio(
 ) -> GuiAgentInterpreterChatResponseAny:
     try:
         # Get the next message from the queue
-        new_message = GuiAgentInterpreterChatMessage()
-        new_message.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
-        new_message.role = GuiAgentInterpreterChatMessage.Role.USER
-        new_message.content = new_query
+        new_request = GuiAgentInterpreterChatRequest()
+        new_request.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
+        new_request.role = GuiAgentInterpreterChatMessage.Role.USER
+        new_request.content = new_query
 
         # messages from history
         messages = memory.load_memory_variables({})["history"]
-        converted_messages = convert_messages(messages)
+        request_core_list = convert_messages(messages)
 
         if last_user_message_content != new_query:
             # is_auto=Trueの場合はここを通る
-            if not is_last_user_message_content_remain(last_user_message_content, converted_messages):
+            if not is_last_user_message_content_remain(last_user_message_content, request_core_list):
                 # ユーザ入力を忘れたので追加する
-                last_user_message = GuiAgentInterpreterChatMessage()
+                last_user_message = GuiAgentInterpreterChatRequest()
                 last_user_message.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
                 last_user_message.role = GuiAgentInterpreterChatMessage.Role.USER
                 last_user_message.content = last_user_message_content
-                converted_messages.insert(0, last_user_message)
+                request_core_list.insert(0, last_user_message)
 
-        converted_messages.append(new_message)
+        request_core_list.append(new_request)
 
         # 最終的なメッセージ(実際はsystem_messageが追加される)
         show_data_debug(
-            converted_messages,
-            "converted_messages",
+            request_core_list,
+            "request_core_list",
         )
 
         response_list = []
-        response_chunks = process_and_format_message(converted_messages, interpreter)
-        print("process_messages_gradio response_chunks=", response_chunks)
+        response_chunks = process_and_format_message(request_core_list, interpreter)
+        # print("process_messages_gradio response_chunks=", response_chunks)
         async for chunk in response_chunks:
             # Send out assistant message chunks
-            print("process_messages_gradio response=", chunk)
+            # print("process_messages_gradio response=", chunk)
             yield chunk
             response_list.append(chunk.content)
         full_response = "".join(response_list)
@@ -99,11 +101,11 @@ async def process_messages_gradio(
 
 
 async def process_and_format_message(
-    message: GuiAgentInterpreterChatMessageList, interpreter: GuiAgentInterpreterABC
+    request_core_list: GuiAgentInterpreterChatRequestList, interpreter: GuiAgentInterpreterABC
 ) -> GuiAgentInterpreterChatResponseAny:
     try:
         # TODO: rename message -> messages
-        response_chunks = interpreter.chat_core(message, display=False, stream=True)
+        response_chunks = interpreter.chat_core(request_core_list, display=False, stream=True)
         if not inspect.isasyncgen(response_chunks):
             # 同期ジェネレーターの場合
             for chunk in format_message_sync(response_chunks):

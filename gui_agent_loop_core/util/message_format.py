@@ -7,6 +7,26 @@ from PIL import Image
 from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatMessage, GuiAgentInterpreterChatResponse
 
 
+def format_response_confirmation(chunk_content, chunk: GuiAgentInterpreterChatResponse) -> (str, str):
+    new_chunk_code = ""
+    new_chunk_content = ""
+
+    if chunk_content:
+        if isinstance(chunk_content, dict):
+            if chunk_content["format"] == "code":
+                new_chunk_code = chunk_content["content"]
+            elif chunk_content["format"] == "python":
+                new_chunk_code = chunk_content["content"]
+            else:
+                print("TODO: format_response_confirmation no impl format=", chunk_content["format"])
+                print("format_response CONFIRMATION chunk_content=", chunk_content)
+                print("format_response CONFIRMATION full chunk=", chunk)
+        else:
+            new_chunk_content = chunk_content
+
+    return new_chunk_code, new_chunk_content
+
+
 def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpreterChatResponse:
     response_str = ""
     chunk_content = chunk.content
@@ -46,14 +66,15 @@ def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpret
 
     # Output
     if chunk_type == GuiAgentInterpreterChatMessage.Type.CONFIRMATION:
+        new_chunk_code, new_chunk_content = format_response_confirmation(chunk_content, chunk)
         if chunk_start:
             response_str += "```python\n"
         # TODO: fix CONFIRMATION format
-        print("format_response CONFIRMATION chunk_content=", chunk_content)
-        if chunk_content:
-            response_str += str(chunk_content)
-        elif chunk_code:
-            response_str += str(chunk_code)
+
+        if new_chunk_code:
+            response_str += new_chunk_code
+        elif new_chunk_content:
+            response_str += new_chunk_content
         if chunk_end:
             response_str += "```\n"
 
