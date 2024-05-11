@@ -62,6 +62,7 @@ def prepare_test_data():
         "format": "execution",
         "code": "print('Hello, World!')",
         "language": "python",
+        "content": "",
     }
 
     return conversion_rules, data, expected_output
