@@ -9,12 +9,14 @@ from .mapping_rule import MappingRule
 
 
 class DictFlattenConverter(BaseConverter):
-    def convert(self, raw_dict: Dict[str, Any], conversion_rules: Dict[str, ConversionRule]) -> Dict[str, str]:
+    conversion_rules: Dict[str, ConversionRule]
+
+    def convert(self, raw_dict: Dict[str, Any]) -> Dict[str, str]:
         """
         辞書をフラット化する関数
         """
         flattened_dict = {}
-        DictFlattener().flatten_recursive(raw_dict, conversion_rules, flattened_dict)
+        DictFlattener().flatten_recursive(raw_dict, self.conversion_rules, flattened_dict)
         return flattened_dict
 
 
@@ -59,7 +61,7 @@ def prepare_test_data():
 
 def test_dict_flatten_converter():
     conversion_rules, raw_dict, expected_output = prepare_test_data()
-    flattened_dict = DictFlattenConverter().convert(raw_dict, conversion_rules)
+    flattened_dict = DictFlattenConverter(conversion_rules=conversion_rules).convert(raw_dict)
     assert flattened_dict == expected_output
 
 

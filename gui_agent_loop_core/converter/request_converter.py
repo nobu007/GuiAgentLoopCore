@@ -1,17 +1,36 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Type, Union
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
-from gui_agent_loop_core.converter.conversion_rule import ConversionRule
-from gui_agent_loop_core.converter.dict_flatten_converter import DictFlattenConverter
+from gui_agent_loop_core.converter.dict_flattener.content_dict_rule import ContentDictRule
+from gui_agent_loop_core.converter.dict_flattener.conversion_rule import ConversionRule
+from gui_agent_loop_core.converter.dict_flattener.dict_flatten_converter import DictFlattenConverter
+from gui_agent_loop_core.converter.dict_flattener.mapping_rule import MappingRule
 from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
 
 CoreAny = Union[str, BaseModel, List[BaseModel]]
 
 
 class RequestConverter(DictFlattenConverter):
-    def __init__(self, conversion_rules: Dict[str, ConversionRule]):
-        self.conversion_rules = conversion_rules
+
+    @staticmethod
+    def get_conversion_rules():
+        # Define conversion rules
+        conversion_rules = {
+            "content": ConversionRule(
+                target_key="content",
+                mapping_rules={
+                    "type": MappingRule(old_key="type", new_key="type"),
+                    "format": MappingRule(old_key="format", new_key="format"),
+                    "content": MappingRule(old_key="content", new_key="code"),
+                },
+                content_dict_rules={
+                    "format": ContentDictRule(content_key="format", new_key="language"),
+                },
+                required_keys={"type": "confirmation"},
+            )
+        }
+        return conversion_rules
 
     def to_dict_from_core(
         self, core_any: GuiAgentInterpreterChatRequestAny, core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest
@@ -20,7 +39,7 @@ class RequestConverter(DictFlattenConverter):
         dict_list = super()._to_dict_list_from_core_list(core_list, GuiAgentInterpreterChatRequest)
         converted_dict_list = []
         for core, dict_item in zip(core_list, dict_list):
-            converted_dict_item = self.convert(dict_item, self.conversion_rules)
+            converted_dict_item = self.convert(dict_item)
             converted_dict_list.append(converted_dict_item)
         return converted_dict_list
 
@@ -73,25 +92,21 @@ class RequestConverter(DictFlattenConverter):
         else:
             return self.preprocess_dict({"content": request.content})
 
+    def to_core_from_dict(
+        self, dict_list: List[dict], core_class: Type[GuiAgentInterpreterChatRequest]
+    ) -> GuiAgentInterpreterChatRequestAny:
+        flattened_dict_list = [self.convert(raw_dict) for raw_dict in dict_list]
+        core_list = [core_class.model_validate(flattened_dict) for flattened_dict in flattened_dict_list]
+
+        if len(core_list) == 1:
+            return core_list[0]
+        else:
+            return core_list
+
 
 def test_request_converter():
-    # Define conversion rules
-    conversion_rules = {
-        "content": ConversionRule(
-            target_key="content",
-            mapping_rules={
-                "type": DictFlattenConverter.MappingRule(old_key="type", new_key="type"),
-                "format": DictFlattenConverter.MappingRule(old_key="format", new_key="format"),
-                "content": DictFlattenConverter.MappingRule(old_key="content", new_key="code"),
-            },
-            content_dict_rules={
-                "format": DictFlattenConverter.ContentDictRule(content_key="format", new_key="language"),
-            },
-            required_keys={"type": "confirmation"},
-        )
-    }
-
-    converter = RequestConverter(conversion_rules)
+    conversion_rules = RequestConverter.get_conversion_rules()
+    converter = RequestConverter(conversion_rules=conversion_rules)
 
     # Example 1: Convert single model instance
     request = GuiAgentInterpreterChatRequest(content="Hello, how can I help you?")
@@ -136,4 +151,4 @@ def test_request_converter():
 
 
 if __name__ == "__main__":
-    test()
+    test_request_converter()
