@@ -22,8 +22,8 @@ class ConnectorImplOpenInterpreter(GuiAgentInterpreterABC):
         blocking=True,
     ):
         # core -> inner
-        conversion_rules = RequestConverter.get_conversion_rules()
-        converter = RequestConverter(conversion_rules=conversion_rules)
+        mapping_rules = RequestConverter.get_mapping_rules()
+        converter = RequestConverter(mapping_rules=mapping_rules)
         request_dict_list_inner = converter.to_dict_from_core(request_core)
 
         # chat

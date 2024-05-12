@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Type, Union
 
 from pydantic import BaseModel
 
-from gui_agent_loop_core.converter.dict_flattener.content_dict_rule import ContentDictRule
-from gui_agent_loop_core.converter.dict_flattener.conversion_rule import ConversionRule
 from gui_agent_loop_core.converter.dict_flattener.dict_flatten_converter import DictFlattenConverter
 from gui_agent_loop_core.converter.dict_flattener.mapping_rule import MappingRule
 from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
@@ -14,23 +12,10 @@ CoreAny = Union[str, BaseModel, List[BaseModel]]
 class RequestConverter(DictFlattenConverter):
 
     @staticmethod
-    def get_conversion_rules():
+    def get_mapping_rules():
         # Define conversion rules
-        conversion_rules = {
-            "content": ConversionRule(
-                target_key="content",
-                mapping_rules={
-                    "type": MappingRule(old_key="type", new_key="type"),
-                    "format": MappingRule(old_key="format", new_key="format"),
-                    "content": MappingRule(old_key="content", new_key="code"),
-                },
-                content_dict_rules={
-                    "format": ContentDictRule(content_key="format", new_key="language"),
-                },
-                required_keys={"type": "confirmation"},
-            )
-        }
-        return conversion_rules
+        mapping_rules = MappingRule.get_default_mapping_rules()
+        return mapping_rules
 
     def to_dict_from_core(
         self, core_any: GuiAgentInterpreterChatRequestAny, core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest
@@ -105,8 +90,8 @@ class RequestConverter(DictFlattenConverter):
 
 
 def test_request_converter():
-    conversion_rules = RequestConverter.get_conversion_rules()
-    converter = RequestConverter(conversion_rules=conversion_rules)
+    mapping_rules = RequestConverter.get_mapping_rules()
+    converter = RequestConverter(mapping_rules=mapping_rules)
 
     # Example 1: Convert single model instance
     request = GuiAgentInterpreterChatRequest(content="Hello, how can I help you?")

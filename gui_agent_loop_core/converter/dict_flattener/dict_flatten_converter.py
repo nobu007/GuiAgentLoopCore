@@ -1,40 +1,26 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from gui_agent_loop_core.converter.base_converter import BaseConverter
 
-from .content_dict_rule import ContentDictRule
-from .conversion_rule import ConversionRule
-from .dict_flattener import DictFlattener
-from .mapping_rule import MappingRule
+# from .conversion_rule import ConversionRule
+from .dict_flattener import DictFlattener, MappingRule
 
 
 class DictFlattenConverter(BaseConverter):
-    conversion_rules: Dict[str, ConversionRule]
+    mapping_rules: List[MappingRule] = []
 
     def convert(self, raw_dict: Dict[str, Any]) -> Dict[str, str]:
         """
         辞書をフラット化する関数
         """
-        flattened_dict = {}
-        DictFlattener().flatten_recursive(raw_dict, self.conversion_rules, flattened_dict)
+        flattened_dict = DictFlattener(self.mapping_rules).flatten(raw_dict)
+        if "content" not in flattened_dict:
+            flattened_dict["content"] = ""
         return flattened_dict
 
 
 def prepare_test_data():
-    conversion_rules = {
-        "content": ConversionRule(
-            target_key="content",
-            mapping_rules={
-                "type": MappingRule(old_key="type", new_key="type"),
-                "format": MappingRule(old_key="format", new_key="format"),
-                "content": MappingRule(old_key="content", new_key="code"),
-            },
-            content_dict_rules={
-                "format": ContentDictRule(content_key="format", new_key="language"),
-            },
-            required_keys={"type": "confirmation"},
-        )
-    }
+    mapping_rules = MappingRule.get_default_mapping_rules()
 
     raw_dict = {
         "content": {
@@ -50,18 +36,48 @@ def prepare_test_data():
     }
 
     expected_output = {
+        "role": "computer",
         "type": "confirmation",
         "format": "execution",
         "code": "print('Hello, World!')",
         "language": "python",
+        "content": "",
     }
 
-    return conversion_rules, raw_dict, expected_output
+    return mapping_rules, raw_dict, expected_output
+
+
+def prepare_test_data_simple():
+    mapping_rules = MappingRule.get_default_mapping_rules()
+
+    raw_dict = {
+        "content": {
+            "role": "computer",
+            "type": "confirmation",
+            "format": "execution",
+            "content": "already flat str",
+        },
+    }
+
+    expected_output = {
+        "role": "computer",
+        "type": "confirmation",
+        "format": "execution",
+        "content": "already flat str",
+    }
+
+    return mapping_rules, raw_dict, expected_output
 
 
 def test_dict_flatten_converter():
-    conversion_rules, raw_dict, expected_output = prepare_test_data()
-    flattened_dict = DictFlattenConverter(conversion_rules=conversion_rules).convert(raw_dict)
+    mapping_rules, raw_dict, expected_output = prepare_test_data()
+    converter = DictFlattenConverter(mapping_rules=mapping_rules)
+
+    flattened_dict = converter.convert(raw_dict)
+    assert flattened_dict == expected_output
+
+    mapping_rules, raw_dict, expected_output = prepare_test_data_simple()
+    flattened_dict = converter.convert(raw_dict)
     assert flattened_dict == expected_output
 
 
