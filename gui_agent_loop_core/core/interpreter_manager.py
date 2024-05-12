@@ -31,6 +31,7 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
 
         # Start a separate task for processing messages
         self.current_state = InterpreterState.STATE_RUNNING
+        print("chat self.current_state=", self.current_state)
         response = ""
         async for chunk in process_messages_gradio(
             self.last_user_message_content, new_query, self.interpreter, self.memory
@@ -40,13 +41,16 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
 
         # 最終的な応答を履歴に追加する
         self.current_state = InterpreterState.STATE_STOP
+        print("chat self.current_state=", self.current_state)
         response += "\n処理完了！"
         yield response
 
     def auto_chat(self):
+        print("auto_chat self.current_state=", self.current_state)
         if self.current_state == InterpreterState.STATE_STOP:
             # シミュレートされた入力を生成する
             simulated_input = "会話履歴で状況を確認してから自動的に処理を続けてください。"
+            self.current_state = InterpreterState.STATE_RUNNING
             return self.chat(simulated_input, is_auto=True)
         elif self.current_state == InterpreterState.STATE_RUNNING:
             return "実行中です。処理完了後に自動実行を継続します。"

@@ -56,7 +56,7 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         app.load(
             fn=interpreter_manager.auto_chat,
             outputs=[output_block],
-            every=10,  # every:sec
+            every=60,  # every:sec
         )
         app.load(fn=interpreter_manager.update_state_view, outputs=[state_label], every=3)
 

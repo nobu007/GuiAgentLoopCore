@@ -29,9 +29,11 @@ class ConnectorImplOpenInterpreter(GuiAgentInterpreterABC):
         # chat
         print("chat_core request_dict_list_inner=", request_dict_list_inner)
         response_inner = self.chat(request_dict_list_inner, display, stream, blocking)
-        print("chat_core response_inner=", response_inner)
 
-        # inner -> core
-        response_core_list = converter.to_core_from_dict(response_inner, core_class=GuiAgentInterpreterChatRequest)
-        for chunk in response_core_list:
-            yield chunk
+        for chunk_inner in response_inner:
+            print("chat_core response_inner chunk_inner=", chunk_inner)
+
+            # inner -> core
+            response_core = converter.to_core_from_dict([chunk_inner], core_class=GuiAgentInterpreterChatRequest)
+
+            yield response_core
