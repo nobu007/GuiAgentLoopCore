@@ -36,16 +36,16 @@ def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpret
     chunk_code = chunk.code  # working change(may nothing set)
     chunk_start = chunk.start
     chunk_end = chunk.end
-    # print(
-    #     "format_response chunk_type=",
-    #     chunk_type,
-    #     ", chunk_role=",
-    #     chunk_role,
-    #     ", chunk_start=",
-    #     chunk_start,
-    #     ", chunk_end=",
-    #     chunk_end,
-    # )
+    print(
+        "format_response chunk_type=",
+        chunk_type,
+        ", chunk_role=",
+        chunk_role,
+        ", chunk_start=",
+        chunk_start,
+        ", chunk_end=",
+        chunk_end,
+    )
     # Message
     if chunk_type == GuiAgentInterpreterChatMessage.Type.MESSAGE:
         response_str = chunk_content

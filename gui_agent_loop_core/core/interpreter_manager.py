@@ -34,8 +34,8 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         print("chat self.current_state=", self.current_state)
         response = ""
         for chunk in process_messages_gradio(self.last_user_message_content, new_query, self.interpreter, self.memory):
-            yield chunk.content
             response += chunk.content
+            yield response
 
         # 最終的な応答を履歴に追加する
         self.current_state = InterpreterState.STATE_STOP
