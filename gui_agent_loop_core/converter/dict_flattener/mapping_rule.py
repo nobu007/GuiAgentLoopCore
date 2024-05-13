@@ -98,7 +98,7 @@ def prepare_test_data():
     return mapping_rules, data, expected_output
 
 
-def test_mapping_rule_apply():
+def test_mapping_rule():
     mapping_rules, data, expected_output = prepare_test_data()
     flattened_dict = {}
 
@@ -111,4 +111,4 @@ def test_mapping_rule_apply():
 
 
 if __name__ == "__main__":
-    test_mapping_rule_apply()
+    test_mapping_rule()
