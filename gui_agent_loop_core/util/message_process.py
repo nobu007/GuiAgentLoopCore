@@ -1,5 +1,5 @@
-import inspect
 import traceback
+from collections.abc import AsyncIterator, Iterator
 
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_core.messages import AIMessage, HumanMessage
@@ -8,14 +8,14 @@ from langchain_core.messages.base import BaseMessage
 from gui_agent_loop_core.schema.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
-    GuiAgentInterpreterChatMessageList,
     GuiAgentInterpreterChatRequest,
-    GuiAgentInterpreterChatRequestAny,
     GuiAgentInterpreterChatRequestList,
+    GuiAgentInterpreterChatResponse,
     GuiAgentInterpreterChatResponseAny,
     GuiAgentInterpreterChatResponseAnyAsync,
     GuiAgentInterpreterChatResponseGenerator,
 )
+from gui_agent_loop_core.util.gui_agent_stream_wrapper import GuiAgentStreamWrapper
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
 
@@ -48,7 +48,7 @@ def is_last_user_message_content_remain(last_user_message_content, converted_mes
     return False
 
 
-async def process_messages_gradio(
+def process_messages_gradio(
     last_user_message_content: str,
     new_query: str,
     interpreter: GuiAgentInterpreterABC,
@@ -86,7 +86,7 @@ async def process_messages_gradio(
         response_list = []
         response_chunks = process_and_format_message(request_core_list, interpreter)
         # print("process_messages_gradio response_chunks=", response_chunks)
-        async for chunk in response_chunks:
+        for chunk in response_chunks:
             # Send out assistant message chunks
             # print("process_messages_gradio response=", chunk)
             yield chunk
@@ -100,42 +100,17 @@ async def process_messages_gradio(
         traceback.print_exc()
 
 
-async def process_and_format_message(
+def process_and_format_message(
     request_core_list: GuiAgentInterpreterChatRequestList, interpreter: GuiAgentInterpreterABC
-) -> GuiAgentInterpreterChatResponseAny:
+) -> Iterator[GuiAgentInterpreterChatResponse]:
     try:
         # TODO: rename message -> messages
-        response_chunks = interpreter.chat_core(request_core_list, display=False, stream=True)
-        if not inspect.isasyncgen(response_chunks):
-            # 同期ジェネレーターの場合
-            for chunk in format_message_sync(response_chunks):
-                yield chunk
-        else:
-            # 非同期ジェネレーターの場合
-            for chunk in format_message_async(response_chunks):
-                yield chunk
-    except Exception as e:
-        print(f"Error in chat: {e}")
-        traceback.print_exc()
+        response = interpreter.chat_core(request_core_list, display=False, stream=True)
+        response_wrapper = GuiAgentStreamWrapper(response)  # wrapper is always as sync stream list
 
-
-def format_message_sync(
-    response_chunks: GuiAgentInterpreterChatResponseAnyAsync,
-) -> GuiAgentInterpreterChatResponseGenerator:
-    try:
-        for chunk in response_chunks:
-            yield format_response(chunk)
-    except Exception as e:
-        print(f"Error in chat: {e}")
-        traceback.print_exc()
-
-
-async def format_message_async(
-    response_chunks: GuiAgentInterpreterChatResponseAnyAsync,
-) -> GuiAgentInterpreterChatResponseAnyAsync:
-    try:
-        async for chunk in response_chunks:
-            yield format_response(chunk)
+        for chunk in response_wrapper:
+            formatted_chunk = format_response(chunk)
+            yield formatted_chunk
     except Exception as e:
         print(f"Error in chat: {e}")
         traceback.print_exc()

@@ -105,6 +105,8 @@ GuiAgentInterpreterChatResponseAnyAsync = Union[
     GuiAgentInterpreterChatResponse,
     AsyncGenerator[GuiAgentInterpreterChatResponse, None],
 ]
+GuiAgentInterpreterChatResponseStr = str
+
 GuiAgentInterpreterChatRequestList = List[GuiAgentInterpreterChatRequest]
 GuiAgentInterpreterChatRequests = Union[GuiAgentInterpreterChatRequest, List[GuiAgentInterpreterChatRequest]]
 GuiAgentInterpreterChatRequestAny = Union[
@@ -340,7 +342,7 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     def auto_chat(self) -> str:
         return ""
 
-    class ConfigDict :
+    class ConfigDict:
         arbitrary_types_allowed = True
         validate_assignment = True
 

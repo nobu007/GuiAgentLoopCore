@@ -19,7 +19,7 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         self.current_state = InterpreterState.STATE_INIT
 
     # チャットボットの応答を生成する関数
-    async def chat(self, new_query: str, is_auto=False):
+    def chat(self, new_query: str, is_auto=False):
         show_data_debug(new_query, "new_query")
         if not new_query:
             print("skip no input")
@@ -33,9 +33,7 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         self.current_state = InterpreterState.STATE_RUNNING
         print("chat self.current_state=", self.current_state)
         response = ""
-        async for chunk in process_messages_gradio(
-            self.last_user_message_content, new_query, self.interpreter, self.memory
-        ):
+        for chunk in process_messages_gradio(self.last_user_message_content, new_query, self.interpreter, self.memory):
             yield chunk.content
             response += chunk.content
 
