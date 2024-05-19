@@ -30,7 +30,10 @@ class DummyInterpreter(GuiAgentInterpreterBase):
 
 @click.command()
 @click.option(
-    "--interpreter", default=None, type=click.UNPROCESSED, callback=lambda _, __, value: value or DummyInterpreter()
+    "--interpreter",
+    default=None,
+    type=click.UNPROCESSED,
+    callback=lambda _, __, value: value or DummyInterpreter(),
 )
 def main(interpreter: GuiAgentInterpreterABC):
     """Main entrypoint."""

@@ -99,7 +99,9 @@ GuiAgentInterpreterChatMessages = Union[GuiAgentInterpreterChatMessage, List[Gui
 GuiAgentInterpreterChatMessagesAny = Union[str, GuiAgentInterpreterChatMessage, List[GuiAgentInterpreterChatMessage]]
 GuiAgentInterpreterChatResponseGenerator = Generator[GuiAgentInterpreterChatResponse, None, None]
 GuiAgentInterpreterChatResponseAny = Union[
-    GuiAgentInterpreterChatResponse, Generator[GuiAgentInterpreterChatResponse, None, None], AsyncGenerator[str, None]
+    GuiAgentInterpreterChatResponse,
+    Generator[GuiAgentInterpreterChatResponse, None, None],
+    AsyncGenerator[str, None],
 ]
 GuiAgentInterpreterChatResponseAnyAsync = Union[
     GuiAgentInterpreterChatResponse,
@@ -167,7 +169,11 @@ class GuiAgentInterpreterSampleOK:
 
 class GuiAgentInterpreterSamplePramNG:
     def chat_core(
-        self, request_core: str, display: bool = False, stream: bool = False, blocking: bool = False
+        self,
+        request_core: str,
+        display: bool = False,
+        stream: bool = False,
+        blocking: bool = False,
     ) -> GuiAgentInterpreterChatResponseAny:
         response = GuiAgentInterpreterChatResponse()
         return response
@@ -189,7 +195,9 @@ from typing import List, Optional, get_args, get_origin
 
 
 def validate_parameter_signature(
-    expected_params: List[inspect.Parameter], actual_params: List[inspect.Parameter], method_name: str
+    expected_params: List[inspect.Parameter],
+    actual_params: List[inspect.Parameter],
+    method_name: str,
 ):
     """
     Validates the parameter signatures of a method.
@@ -205,14 +213,14 @@ def validate_parameter_signature(
     # Check if the number of parameters matches
     if len(expected_params) != len(actual_params):
         raise ValueError(
-            f'Object.{method_name} has an incompatible number of parameters. Expected: {len(expected_params)}, Actual: {len(actual_params)}'
+            f"Object.{method_name} has an incompatible number of parameters. Expected: {len(expected_params)}, Actual: {len(actual_params)}"
         )
 
     # Check if the parameter names and annotations match
     for expected_param, actual_param in zip(expected_params, actual_params):
         if expected_param.name != actual_param.name:
             raise ValueError(
-                f'Object.{method_name} has an incompatible parameter name. Expected: {expected_param.name}, Actual: {actual_param.name}'
+                f"Object.{method_name} has an incompatible parameter name. Expected: {expected_param.name}, Actual: {actual_param.name}"
             )
 
         expected_annotation = expected_param.annotation
@@ -240,7 +248,9 @@ def validate_parameter_signature(
 
 
 def validate_return_signature(
-    expected_signature: inspect.Signature, actual_signature: inspect.Signature, method_name: str
+    expected_signature: inspect.Signature,
+    actual_signature: inspect.Signature,
+    method_name: str,
 ):
     """
     Validates the return signature of a method.
@@ -260,7 +270,7 @@ def validate_return_signature(
         if expected_return_annotation is inspect.Signature.empty or actual_return_annotation is inspect.Signature.empty:
             return
         raise ValueError(
-            f'Object.{method_name} has an incompatible return annotation. Expected: {expected_return_annotation}, Actual: {actual_return_annotation}'
+            f"Object.{method_name} has an incompatible return annotation. Expected: {expected_return_annotation}, Actual: {actual_return_annotation}"
         )
 
 
@@ -278,11 +288,11 @@ def validate_method_signature(obj: Any, abc_class: Type, method_name: str):
                     the parameter signatures do not match, or the return signature does not match.
     """
     if not hasattr(obj, method_name):
-        raise ValueError(f'Object must have a {method_name} method')
+        raise ValueError(f"Object must have a {method_name} method")
 
     method = getattr(obj, method_name)
     if not callable(method):
-        raise ValueError(f'Object.{method_name} must be callable')
+        raise ValueError(f"Object.{method_name} must be callable")
 
     # Get the signature of the ABC's method
     expected_signature = inspect.signature(getattr(abc_class, method_name))
@@ -292,11 +302,11 @@ def validate_method_signature(obj: Any, abc_class: Type, method_name: str):
 
     # Adjust the number of parameters for member functions
     expected_params = list(expected_signature.parameters.values())
-    if expected_params[0].name == 'self':
+    if expected_params[0].name == "self":
         expected_params = expected_params[1:]
 
     actual_params = list(actual_signature.parameters.values())
-    if actual_params[0].name == 'self':
+    if actual_params[0].name == "self":
         actual_params = actual_params[1:]
 
     # Validate the parameter signatures
@@ -314,7 +324,7 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     current_state: InterpreterState = InterpreterState.STATE_INIT
 
     def __init__(self, interpreter: GuiAgentInterpreterABC):
-        validate_method_signature(interpreter, GuiAgentInterpreterABC, 'chat_core')
+        validate_method_signature(interpreter, GuiAgentInterpreterABC, "chat_core")
 
         super().__init__()
         self._interpreter = interpreter

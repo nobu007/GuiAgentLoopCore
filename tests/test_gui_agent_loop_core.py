@@ -30,7 +30,7 @@ def test_command_line_interface():
     """Test the CLI."""
     runner = CliRunner()
 
-    with patch('gui_agent_loop_core.cli.GuiAgentLoopCore.launch_server') as mock_launch_server:
+    with patch("gui_agent_loop_core.cli.GuiAgentLoopCore.launch_server") as mock_launch_server:
         result = runner.invoke(cli.main)
         assert result.exit_code == 0
         assert "GuiAgentLoopCore" in result.output

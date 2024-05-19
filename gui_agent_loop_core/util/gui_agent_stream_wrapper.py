@@ -38,7 +38,7 @@ class GuiAgentStreamWrapper(Iterable, AsyncIterable):
         yield value
 
     def __iter__(self) -> Iterator:
-        if hasattr(self, 'iterator'):
+        if hasattr(self, "iterator"):
             return self.iterator
         else:
             return self._sync_iter()
@@ -54,9 +54,9 @@ class GuiAgentStreamWrapper(Iterable, AsyncIterable):
         return iter(results)
 
     def __aiter__(self) -> AsyncIterator:
-        if hasattr(self, 'aiterator'):
+        if hasattr(self, "aiterator"):
             return self.aiterator
-        elif hasattr(self, 'iterator'):
+        elif hasattr(self, "iterator"):
             return self._async_iter_from_sync()
         else:
             raise TypeError("Not an async iterable")
@@ -66,10 +66,10 @@ class GuiAgentStreamWrapper(Iterable, AsyncIterable):
             yield item
 
     async def _async_iter(self) -> AsyncIterator:
-        if hasattr(self, 'aiterator'):
+        if hasattr(self, "aiterator"):
             async for item in self.aiterator:
                 yield item
-        elif hasattr(self, 'iterator'):
+        elif hasattr(self, "iterator"):
             for item in self.iterator:
                 yield item
         else:

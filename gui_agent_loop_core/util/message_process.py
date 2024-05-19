@@ -19,7 +19,9 @@ from gui_agent_loop_core.util.gui_agent_stream_wrapper import GuiAgentStreamWrap
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
 
-def convert_messages(langchain_messages: list[BaseMessage]) -> GuiAgentInterpreterChatRequestList:
+def convert_messages(
+    langchain_messages: list[BaseMessage],
+) -> GuiAgentInterpreterChatRequestList:
     request_core_list = []
     for message in langchain_messages:
         converted_message = GuiAgentInterpreterChatRequest()
@@ -101,7 +103,8 @@ def process_messages_gradio(
 
 
 def process_and_format_message(
-    request_core_list: GuiAgentInterpreterChatRequestList, interpreter: GuiAgentInterpreterABC
+    request_core_list: GuiAgentInterpreterChatRequestList,
+    interpreter: GuiAgentInterpreterABC,
 ) -> Iterator[GuiAgentInterpreterChatResponse]:
     try:
         # TODO: rename message -> messages

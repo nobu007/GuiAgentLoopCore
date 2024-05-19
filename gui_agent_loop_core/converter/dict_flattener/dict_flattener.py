@@ -19,7 +19,10 @@ class DictFlattener:
         return flattened_dict
 
     def _flatten(
-        self, data: Dict[str, Any], upper_data: Dict[str, Any], flattened_dict: Dict[str, str]
+        self,
+        data: Dict[str, Any],
+        upper_data: Dict[str, Any],
+        flattened_dict: Dict[str, str],
     ) -> Dict[str, str]:
         """
         辞書をフラット化する関数

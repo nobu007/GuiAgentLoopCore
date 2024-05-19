@@ -10,7 +10,9 @@ CoreAny = Union[str, BaseModel, List[BaseModel]]
 
 class RequestConverterStr(BaseConverter):
     def to_str_from_core(
-        self, core_any: GuiAgentInterpreterChatRequestAny, core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest
+        self,
+        core_any: GuiAgentInterpreterChatRequestAny,
+        core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest,
     ) -> List[str]:
         core_list = super().to_dict_from_core(core_any, core_class)
         str_list = []

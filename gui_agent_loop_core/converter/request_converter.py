@@ -10,7 +10,6 @@ CoreAny = Union[str, BaseModel, List[BaseModel]]
 
 
 class RequestConverter(DictFlattenConverter):
-
     @staticmethod
     def get_mapping_rules():
         # Define conversion rules
@@ -18,7 +17,9 @@ class RequestConverter(DictFlattenConverter):
         return mapping_rules
 
     def to_dict_from_core(
-        self, core_any: GuiAgentInterpreterChatRequestAny, core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest
+        self,
+        core_any: GuiAgentInterpreterChatRequestAny,
+        core_class: Type[BaseModel] = GuiAgentInterpreterChatRequest,
     ) -> List[dict]:
         core_list = super().to_core_list_from_core_any(core_any, core_class)
         dict_list = super()._to_dict_list_from_core_list(core_list, GuiAgentInterpreterChatRequest)

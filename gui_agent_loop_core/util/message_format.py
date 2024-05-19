@@ -18,7 +18,10 @@ def format_response_confirmation(chunk_content, chunk: GuiAgentInterpreterChatRe
             elif chunk_content["format"] == "python":
                 new_chunk_code = chunk_content["content"]
             else:
-                print("TODO: format_response_confirmation no impl format=", chunk_content["format"])
+                print(
+                    "TODO: format_response_confirmation no impl format=",
+                    chunk_content["format"],
+                )
                 print("format_response CONFIRMATION chunk_content=", chunk_content)
                 print("format_response CONFIRMATION full chunk=", chunk)
         else:
@@ -27,7 +30,9 @@ def format_response_confirmation(chunk_content, chunk: GuiAgentInterpreterChatRe
     return new_chunk_code, new_chunk_content
 
 
-def format_response(chunk: GuiAgentInterpreterChatResponse) -> GuiAgentInterpreterChatResponse:
+def format_response(
+    chunk: GuiAgentInterpreterChatResponse,
+) -> GuiAgentInterpreterChatResponse:
     response_str = ""
     chunk_content = chunk.content
     chunk_type = chunk.type

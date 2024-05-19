@@ -9,14 +9,24 @@ class MappingRule(BaseModel):
     required_keys: List[Tuple[str, str]] = []
     required_keys_upper: List[Tuple[str, str]] = []
 
-    def apply(self, data: Dict[str, Any], upper_data: Dict[str, Any], flattened_dict: Dict[str, str]):
+    def apply(
+        self,
+        data: Dict[str, Any],
+        upper_data: Dict[str, Any],
+        flattened_dict: Dict[str, str],
+    ):
         """
         マッピングルール＋単純なフラット化を適用する関数
         """
         self._apply_mapping_rule(data, upper_data, flattened_dict)
         self._apply_simple(data, flattened_dict)
 
-    def _apply_mapping_rule(self, data: Dict[str, Any], upper_data: Dict[str, Any], flattened_dict: Dict[str, str]):
+    def _apply_mapping_rule(
+        self,
+        data: Dict[str, Any],
+        upper_data: Dict[str, Any],
+        flattened_dict: Dict[str, str],
+    ):
         """
         マッピングルールを適用する関数
         """
