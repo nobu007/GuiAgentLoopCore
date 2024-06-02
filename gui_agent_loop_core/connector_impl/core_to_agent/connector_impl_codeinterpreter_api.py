@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from gui_agent_loop_core.converter.request_converter import RequestConverter
 from gui_agent_loop_core.converter.request_converter_str import RequestConverterStr
+from gui_agent_loop_core.converter.response_converter_str import ResponseConverterStr
 from gui_agent_loop_core.schema.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
@@ -22,13 +23,14 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         stream=False,
         blocking=True,
     ) -> GuiAgentInterpreterChatResponseAny:
-        converter = RequestConverter()
-        converter_str = RequestConverterStr()
+        request_converter = RequestConverter()
+        request_converter_str = RequestConverterStr()
+        response_converter_str = ResponseConverterStr()
 
         # core -> inner(dict)
         mapping_rules = RequestConverter.get_mapping_rules()
-        converter = RequestConverter(mapping_rules=mapping_rules)
-        request_dict_list_inner = converter.to_dict_from_core(request_core)
+        request_converter = RequestConverter(mapping_rules=mapping_rules)
+        request_dict_list_inner = request_converter.to_dict_from_core(request_core)
 
         # chat
         print("chat_core request_inner=", request_dict_list_inner)
@@ -46,7 +48,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
                 print("chat_core response_inner chunk_inner=", chunk_inner)
 
                 # inner -> core
-                response_core = converter_str.to_core_from_single_str(last_message)
+                response_core = request_converter_str.to_core_from_single_str(last_message)
                 response_core.role = GuiAgentInterpreterChatMessage.Role.ASSISTANT
                 yield response_core
         else:
@@ -56,8 +58,10 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             print("response_inner=", response_inner)
             response_inner_str = str(response_inner.content)  # workaround
             response_inner_code_log_str = str(response_inner.code_log)  # workaround
-            response_core = converter_str.to_core_from_single_str(response_inner_str)
+            response_core = response_converter_str.to_core_from_single_str(response_inner_str)
             response_core.role = GuiAgentInterpreterChatMessage.Role.ASSISTANT
+            response_core.code = response_inner.code_log
+            response_core.agent_name = response_inner.agent_name
             print("response_inner_code_log_str=", response_inner_code_log_str)
             print("response_core=", response_core)
             yield response_core

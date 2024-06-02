@@ -77,11 +77,25 @@ class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
         def __repr__(self):
             return self.value
 
+    class AgentName(str, enum.Enum):
+        AGENT_EXECUTOR = "agent_executor"
+        LLM_PLANNER = "llm_planner"
+        SUPERVISOR = "supervisor"
+        THOUGHT = "thought"
+        OTHER = "other"
+
+        def __str__(self):
+            return self.value
+
+        def __repr__(self):
+            return self.value
+
     format: Optional[Format] = Format.OUTPUT
     code: Optional[str] = ""  # working change(may nothing set)
     language: Optional[str] = ""  # working change(may nothing set)
     start: Optional[bool] = False  # indicate first frame of chunks
     end: Optional[bool] = False  # indicate last frame of chunks
+    agent_name: Optional[AgentName] = AgentName.OTHER
 
 
 class GuiAgentInterpreterChatRequest(GuiAgentInterpreterChatResponse):
@@ -320,8 +334,8 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     _interpreter: Optional[GuiAgentInterpreterABC] = None
     memory: Optional[Any] = None  # TODO: change BaseChatMessageHistory(but error occur)
     last_user_message_content: Optional[str] = None
-
     current_state: InterpreterState = InterpreterState.STATE_INIT
+    agent_name: Optional[str] = ""
 
     def __init__(self, interpreter: GuiAgentInterpreterABC):
         validate_method_signature(interpreter, GuiAgentInterpreterABC, "chat_core")

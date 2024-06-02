@@ -7,13 +7,13 @@ from gui_agent_loop_core.schema.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatRequest,
     GuiAgentInterpreterChatRequestAny,
+    GuiAgentInterpreterChatResponse,
 )
 
 CoreAny = Union[str, BaseModel, List[BaseModel]]
 
 
 class ConnectorImplOpenInterpreter(GuiAgentInterpreterABC):
-
     def chat_core(
         self,
         request_core: GuiAgentInterpreterChatRequestAny,
@@ -34,6 +34,6 @@ class ConnectorImplOpenInterpreter(GuiAgentInterpreterABC):
             print("chat_core response_inner chunk_inner=", chunk_inner)
 
             # inner -> core
-            response_core = converter.to_core_from_dict([chunk_inner], core_class=GuiAgentInterpreterChatRequest)
+            response_core = converter.to_core_from_dict([chunk_inner], core_class=GuiAgentInterpreterChatResponse)
 
             yield response_core

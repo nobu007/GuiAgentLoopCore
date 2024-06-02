@@ -1,6 +1,19 @@
+from typing import Generator, Tuple
+
 from langchain.memory import ConversationBufferWindowMemory
 
-from gui_agent_loop_core.schema.schema import GuiAgentInterpreterManagerBase, InterpreterState
+from gui_agent_loop_core.schema.schema import (
+    GuiAgentInterpreterABC,
+    GuiAgentInterpreterChatMessage,
+    GuiAgentInterpreterChatRequest,
+    GuiAgentInterpreterChatRequestList,
+    GuiAgentInterpreterChatResponse,
+    GuiAgentInterpreterChatResponseAny,
+    GuiAgentInterpreterChatResponseAnyAsync,
+    GuiAgentInterpreterChatResponseGenerator,
+    GuiAgentInterpreterManagerBase,
+    InterpreterState,
+)
 from gui_agent_loop_core.util.message_format import show_data_debug
 from gui_agent_loop_core.util.message_process import process_messages_gradio
 
@@ -17,9 +30,10 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         )
         self.last_user_message_content = "N/A"
         self.current_state = InterpreterState.STATE_INIT
+        self.agent_name = ""
 
     # チャットボットの応答を生成する関数
-    def chat(self, new_query: str, is_auto=False):
+    def chat(self, new_query: str, is_auto=False) -> Generator[Tuple[str], Tuple[str], None]:
         show_data_debug(new_query, "new_query")
         if not new_query:
             print("skip no input")
@@ -35,6 +49,7 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         response = ""
         for chunk in process_messages_gradio(self.last_user_message_content, new_query, self.interpreter, self.memory):
             response += chunk.content
+            self.agent_name = chunk.agent_name
             yield response
 
         # 最終的な応答を履歴に追加する
@@ -43,17 +58,17 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         response += "\n処理完了！"
         yield response
 
-    def auto_chat(self):
+    def auto_chat(self) -> Generator[Tuple[str], Tuple[str], None]:
         print("auto_chat self.current_state=", self.current_state)
         if self.current_state == InterpreterState.STATE_STOP:
             # シミュレートされた入力を生成する
             simulated_input = "会話履歴で状況を確認してから自動的に処理を続けてください。"
             self.current_state = InterpreterState.STATE_RUNNING
-            return self.chat(simulated_input, is_auto=True)
+            yield from self.chat(simulated_input, is_auto=True)
         elif self.current_state == InterpreterState.STATE_RUNNING:
-            return "実行中です。処理完了後に自動実行を継続します。"
+            yield "実行中です。処理完了後に自動実行を継続します。"
         else:
-            return "自動実行するには初回のユーザ指示を出してください。"
+            yield "自動実行するには初回のユーザ指示を出してください。"
 
     def change_state_running(self):
         self.current_state = InterpreterState.STATE_RUNNING
@@ -62,3 +77,7 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
     def update_state_view(self):
         print("update_state_view self.current_state=", self.current_state)
         return self.current_state
+
+    def update_agent_name_view(self):
+        print("update_agent_name_view self.agent_name=", self.agent_name)
+        return self.agent_name
