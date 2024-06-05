@@ -3,6 +3,7 @@ from typing import Generator, Tuple
 from langchain.memory import ConversationBufferWindowMemory
 
 from gui_agent_loop_core.schema.schema import (
+    AgentName,
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatRequest,
@@ -29,8 +30,8 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
             return_messages=True,
         )
         self.last_user_message_content = "N/A"
-        self.current_state = InterpreterState.STATE_INIT
-        self.agent_name = ""
+        self.current_state: InterpreterState = InterpreterState.STATE_INIT
+        self.agent_name: AgentName = AgentName.OTHER
 
     # チャットボットの応答を生成する関数
     def chat(self, new_query: str, is_auto=False) -> Generator[Tuple[str], Tuple[str], None]:
@@ -49,7 +50,10 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         response = ""
         for chunk in process_messages_gradio(self.last_user_message_content, new_query, self.interpreter, self.memory):
             response += chunk.content
-            self.agent_name = chunk.agent_name
+            print("chat chunk.agent_name=", chunk.agent_name)
+            if chunk.agent_name != str(AgentName.OTHER):
+                self.agent_name = chunk.agent_name
+                print("chat agent_name=", self.agent_name)
             yield response
 
         # 最終的な応答を履歴に追加する

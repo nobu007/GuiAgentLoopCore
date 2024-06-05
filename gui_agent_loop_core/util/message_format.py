@@ -41,6 +41,7 @@ def format_response(
     chunk_code = chunk.code  # working change(may nothing set)
     chunk_start = chunk.start
     chunk_end = chunk.end
+    chunk_agent_name = chunk.agent_name
     print(
         "format_response chunk_type=",
         chunk_type,
@@ -120,6 +121,7 @@ def format_response(
     response.code = chunk_code
     response.start = chunk_start
     response.end = chunk_end
+    response.agent_name = chunk_agent_name
     return response
 
 

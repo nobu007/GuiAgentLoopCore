@@ -8,6 +8,20 @@ from langchain.memory.chat_memory import BaseChatMessageHistory
 from pydantic import BaseModel, Field, model_validator, validate_call
 
 
+class AgentName(str, enum.Enum):
+    AGENT_EXECUTOR = "agent_executor"
+    LLM_PLANNER = "llm_planner"
+    SUPERVISOR = "supervisor"
+    THOUGHT = "thought"
+    OTHER = "other"
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
+
+
 class GuiAgentInterpreterChatMessage(BaseModel):
     """First message to GuiAgentInterprete"""
 
@@ -70,19 +84,6 @@ class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
         EXECUTION = "execution"
         PYTHON = "python"
         # TODO: fix
-
-        def __str__(self):
-            return self.value
-
-        def __repr__(self):
-            return self.value
-
-    class AgentName(str, enum.Enum):
-        AGENT_EXECUTOR = "agent_executor"
-        LLM_PLANNER = "llm_planner"
-        SUPERVISOR = "supervisor"
-        THOUGHT = "thought"
-        OTHER = "other"
 
         def __str__(self):
             return self.value

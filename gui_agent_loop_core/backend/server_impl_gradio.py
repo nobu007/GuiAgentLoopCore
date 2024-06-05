@@ -1,6 +1,9 @@
+import os
+
 import gradio as gr
 
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
+from gui_agent_loop_core.schema.schema import AgentName
 
 STATE_INIT = "init"
 STATE_RUNNING = "running"
@@ -15,7 +18,7 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
     # Gradioインターフェースを複数持つ構成
     with gr.Blocks() as app:
         # image
-        agent_image = gr.Image(width=128, height=128, label="Agent Image", value="resource/agent_icon.png")
+        agent_image = gr.Image(width=128, height=128, label="Agent Image")
         # state
         state_label = gr.Label(label="state", value=STATE_INIT)
         # agentの種類を表示するためのLabel
@@ -56,24 +59,29 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         # 外部トリガの結果を表示するためのTextareaBlock
         output_block = gr.Textbox(label="出力メッセージ")
 
-        def update_agent_image(agent_name):
+        def update_agent_image(agent_name, agent_image):
             agent_image_path = "resource/agent_icon.png"
-            if agent_name == "agent_executor":
+            if agent_name == AgentName.AGENT_EXECUTOR:
                 agent_image_path = "resource/agent_executor_icon.png"
-            elif agent_name == "supervisor":
+            elif agent_name == AgentName.SUPERVISOR:
                 agent_image_path = "resource/supervisor.png"
-            elif agent_name == "llm_planner":
+            elif agent_name == AgentName.LLM_PLANNER:
                 agent_image_path = "resource/llm_planner_icon.png"
-            elif agent_name == "thought":
+            elif agent_name == AgentName.THOUGHT:
                 agent_image_path = "resource/thought_icon.png"
             else:
                 pass
-            return agent_image_path
+
+            if agent_image_path and os.path.exists(agent_image_path):
+                agent_image.update(value=agent_image_path)
+            else:
+                agent_image.update(value=None)
+            return agent_image
 
         # agent_name_labelの出力が変更されたときにagentのアイコンを更新
         agent_name_label.change(
             fn=update_agent_image,
-            inputs=[agent_name_label],
+            inputs=[agent_name_label, agent_image],
             outputs=[agent_image],
         )
 
