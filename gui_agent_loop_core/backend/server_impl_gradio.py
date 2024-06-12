@@ -12,6 +12,28 @@ g_last_user_message_content = "N/A"
 g_current_state = STATE_INIT
 
 
+def _update_agent_image(agent_name):
+    agent_image_filename = "agent_icon.png"
+    if agent_name == AgentName.AGENT_EXECUTOR:
+        agent_image_filename = "agent_executor_icon.png"
+    elif agent_name == AgentName.SUPERVISOR:
+        agent_image_filename = "supervisor_icon.png"
+    elif agent_name == AgentName.LLM_PLANNER:
+        agent_image_filename = "llm_planner_icon.png"
+    elif agent_name == AgentName.THOUGHT:
+        agent_image_filename = "thought_icon.png"
+    else:
+        pass
+
+    RESOURCE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "resource"))
+    agent_image_path = os.path.join(RESOURCE_DIR, agent_image_filename)
+    if agent_image_path and os.path.exists(agent_image_path):
+        return agent_image_path
+    else:
+        print("WARN _update_agent_image not exist agent_image_path=", agent_image_path)
+        return agent_image_path
+
+
 def _create_interface_chat(interpreter_manager: InterpreterManager):
     print("create_interface_chat start")
 
@@ -59,29 +81,10 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         # 外部トリガの結果を表示するためのTextareaBlock
         output_block = gr.Textbox(label="出力メッセージ")
 
-        def update_agent_image(agent_name, agent_image):
-            agent_image_path = "resource/agent_icon.png"
-            if agent_name == AgentName.AGENT_EXECUTOR:
-                agent_image_path = "resource/agent_executor_icon.png"
-            elif agent_name == AgentName.SUPERVISOR:
-                agent_image_path = "resource/supervisor.png"
-            elif agent_name == AgentName.LLM_PLANNER:
-                agent_image_path = "resource/llm_planner_icon.png"
-            elif agent_name == AgentName.THOUGHT:
-                agent_image_path = "resource/thought_icon.png"
-            else:
-                pass
-
-            if agent_image_path and os.path.exists(agent_image_path):
-                agent_image.update(value=agent_image_path)
-            else:
-                agent_image.update(value=None)
-            return agent_image
-
         # agent_name_labelの出力が変更されたときにagentのアイコンを更新
         agent_name_label.change(
-            fn=update_agent_image,
-            inputs=[agent_name_label, agent_image],
+            fn=_update_agent_image,
+            inputs=[agent_name_label],
             outputs=[agent_image],
         )
 

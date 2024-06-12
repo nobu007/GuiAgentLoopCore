@@ -36,6 +36,8 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         print("chat_core request_inner=", request_dict_list_inner)
         # response_inner = self.chat(request_dict_list_inner, display, stream, blocking)
         last_message = request_dict_list_inner[-1]["content"]
+        full_message = request_dict_list_inner
+        full_message_str = str(request_dict_list_inner)
         print("chat_core last_message=", last_message)
 
         stream = False  # ChainExecutor' object has no attribute 'stream'
