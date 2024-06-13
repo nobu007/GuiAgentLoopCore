@@ -1,5 +1,7 @@
+import uuid
 from typing import Generator, Tuple
 
+import jwt
 from langchain.memory import ConversationBufferWindowMemory
 
 from gui_agent_loop_core.schema.schema import (
@@ -20,6 +22,49 @@ from gui_agent_loop_core.util.message_process import process_messages_gradio
 
 
 class InterpreterManager(GuiAgentInterpreterManagerBase):
+    class ChatSession:
+        def __init__(self, session_id):
+            self.session_id = session_id
+            self.messages = []
+
+        def add_message(self, message):
+            self.messages.append(message)
+
+        def get_messages(self):
+            return self.messages
+
+    class ChatManager:
+        def __init__(self):
+            self.sessions = {}
+
+        def create_session(self):
+            session_id = str(uuid.uuid4())
+            session = InterpreterManager.ChatSession(session_id)
+            self.sessions[session_id] = session
+            return session
+
+        def get_session(self, session_id):
+            return self.sessions.get(session_id)
+
+    def create_session_instance(self):
+        session = self.chat_manager.create_session()
+        return session
+
+    def create_jwt_session_token(self):
+        session = self.create_session_instance()
+        session_id = session.session_id
+
+        # セッションIDをJWTに埋め込む
+        token = jwt.encode({'session_id': session_id}, self.secret_key, algorithm='HS256')
+
+        return token
+
+    def jwt_decode_session(self):
+        # JWTをデコードしてセッションIDを取得
+        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        session_id = payload['session_id']
+        return payload
+
     def __init__(self, interpreter):
         super().__init__(interpreter)
         self.memory = ConversationBufferWindowMemory(
@@ -32,6 +77,10 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         self.last_user_message_content = "N/A"
         self.current_state: InterpreterState = InterpreterState.STATE_INIT
         self.agent_name: AgentName = AgentName.OTHER
+
+        # session
+        self.chat_manager = InterpreterManager.ChatManager()
+        self.secret_key = 'jwt_secret_key_2571'  # JWTの署名に使用するシークレットキー
 
     # チャットボットの応答を生成する関数
     def chat(self, new_query: str, is_auto=False) -> Generator[Tuple[str], Tuple[str], None]:

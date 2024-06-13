@@ -337,6 +337,8 @@ class GuiAgentInterpreterManagerBase(BaseModel):
     last_user_message_content: Optional[str] = None
     current_state: InterpreterState = InterpreterState.STATE_INIT
     agent_name: Optional[str] = ""
+    chat_manager: Optional[Any] = None
+    secret_key: Optional[str] = ""
 
     def __init__(self, interpreter: GuiAgentInterpreterABC):
         validate_method_signature(interpreter, GuiAgentInterpreterABC, "chat_core")

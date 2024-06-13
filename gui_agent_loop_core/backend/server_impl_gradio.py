@@ -45,6 +45,10 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         state_label = gr.Label(label="state", value=STATE_INIT)
         # agentの種類を表示するためのLabel
         agent_name_label = gr.Label(label="Agent Name", value="")
+        # session
+        agent_session = gr.State(interpreter_manager.create_session_instance())
+        print("agent_session.session_id=", agent_session.value.session_id)
+
         # chat_iface
         input_textbox = gr.Textbox(
             placeholder="こんにちは！何かお手伝いできることはありますか？",
