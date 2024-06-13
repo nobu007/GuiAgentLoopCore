@@ -1,9 +1,7 @@
-import os
-
 import gradio as gr
 
+from gui_agent_loop_core.backend.server_impl_common import update_agent_image
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
-from gui_agent_loop_core.schema.schema import AgentName
 
 STATE_INIT = "init"
 STATE_RUNNING = "running"
@@ -12,35 +10,13 @@ g_last_user_message_content = "N/A"
 g_current_state = STATE_INIT
 
 
-def _update_agent_image(agent_name):
-    agent_image_filename = "agent_icon.png"
-    if agent_name == AgentName.AGENT_EXECUTOR:
-        agent_image_filename = "agent_executor_icon.png"
-    elif agent_name == AgentName.SUPERVISOR:
-        agent_image_filename = "supervisor_icon.png"
-    elif agent_name == AgentName.LLM_PLANNER:
-        agent_image_filename = "llm_planner_icon.png"
-    elif agent_name == AgentName.THOUGHT:
-        agent_image_filename = "thought_icon.png"
-    else:
-        pass
-
-    RESOURCE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "resource"))
-    agent_image_path = os.path.join(RESOURCE_DIR, agent_image_filename)
-    if agent_image_path and os.path.exists(agent_image_path):
-        return agent_image_path
-    else:
-        print("WARN _update_agent_image not exist agent_image_path=", agent_image_path)
-        return agent_image_path
-
-
 def _create_interface_chat(interpreter_manager: InterpreterManager):
     print("create_interface_chat start")
 
     # Gradioインターフェースを複数持つ構成
     with gr.Blocks() as app:
         # image
-        agent_image = gr.Image(width=128, height=128, label="Agent Image")
+        agent_image = gr.Image(value=update_agent_image("AGENT_EXECUTOR"), width=128, height=128, label="Agent Image")
         # state
         state_label = gr.Label(label="state", value=STATE_INIT)
         # agentの種類を表示するためのLabel
@@ -87,28 +63,25 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
 
         # agent_name_labelの出力が変更されたときにagentのアイコンを更新
         agent_name_label.change(
-            fn=_update_agent_image,
+            fn=update_agent_image,
             inputs=[agent_name_label],
             outputs=[agent_image],
         )
 
-        # 定期実行
+        # 定期実行(auto_chat)
         app.load(
             fn=interpreter_manager.auto_chat,
             outputs=[output_block],
             every=60,  # every:sec
         )
+        # 定期実行(STATE_STOP検知)
         app.load(fn=interpreter_manager.update_state_view, outputs=[state_label], every=3)
+        # 定期実行(agent_name検知)
         app.load(fn=interpreter_manager.update_agent_name_view, outputs=[agent_name_label], every=3)
 
         # イベントチェイン(ボタンを押したらRUNNINGにする)
         chat_iface.textbox.submit(fn=interpreter_manager.change_state_running, outputs=[state_label])
         chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[state_label])
-
-        # イベントチェイン(chatbotが終わったらSTOPにする)
-        # chatbot.change(
-        #     fn=change_state_stop, inputs=[chatbot, state_label], outputs=[state_label]
-        # )
 
     print("create_interface_chat end")
     return app, chat_iface, chatbot
