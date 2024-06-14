@@ -4,7 +4,7 @@ from io import BytesIO
 
 from PIL import Image
 
-from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatMessage, GuiAgentInterpreterChatResponse
+from gui_agent_loop_core.schema.message.schema import GuiAgentInterpreterChatMessage, GuiAgentInterpreterChatResponse
 
 
 def format_response_confirmation(chunk_content, chunk: GuiAgentInterpreterChatResponse) -> (str, str):

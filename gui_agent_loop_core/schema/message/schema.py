@@ -1,25 +1,12 @@
 import enum
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, AsyncGenerator, Dict, Generator, Generic, List, Optional, Type, TypeVar, Union, get_args
+from typing import Any, AsyncGenerator, Generator, List, Optional, Type, Union, get_args, get_origin
 
 from langchain.memory import ConversationBufferWindowMemory
-from langchain.memory.chat_memory import BaseChatMessageHistory
-from pydantic import BaseModel, Field, model_validator, validate_call
+from pydantic import BaseModel, validate_call
 
-
-class AgentName(str, enum.Enum):
-    AGENT_EXECUTOR = "agent_executor"
-    LLM_PLANNER = "llm_planner"
-    SUPERVISOR = "supervisor"
-    THOUGHT = "thought"
-    OTHER = "other"
-
-    def __str__(self):
-        return self.value
-
-    def __repr__(self):
-        return self.value
+from gui_agent_loop_core.schema.core.schema import AgentName, InterpreterState
 
 
 class GuiAgentInterpreterChatMessage(BaseModel):
@@ -133,18 +120,6 @@ GuiAgentInterpreterChatRequestAny = Union[
 ]
 
 
-class InterpreterState(str, enum.Enum):
-    STATE_INIT = "init"
-    STATE_RUNNING = "running"
-    STATE_STOP = "stop"
-
-    def __str__(self):
-        return self.value
-
-    def __repr__(self):
-        return self.value
-
-
 class GuiAgentInterpreterABC(ABC):
     @validate_call
     @abstractmethod
@@ -203,10 +178,6 @@ class GuiAgentInterpreterSampleReturnNG:
         blocking: bool = False,
     ) -> str:
         return ""
-
-
-import inspect
-from typing import List, Optional, get_args, get_origin
 
 
 def validate_parameter_signature(

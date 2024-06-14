@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from gui_agent_loop_core.converter.dict_flattener.dict_flatten_converter import DictFlattenConverter
 from gui_agent_loop_core.converter.dict_flattener.mapping_rule import MappingRule
-from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
+from gui_agent_loop_core.schema.message.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
 
 CoreAny = Union[str, BaseModel, List[BaseModel]]
 

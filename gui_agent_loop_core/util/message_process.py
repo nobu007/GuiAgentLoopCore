@@ -1,19 +1,17 @@
 import traceback
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import Iterator
 
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.messages.base import BaseMessage
 
-from gui_agent_loop_core.schema.schema import (
+from gui_agent_loop_core.schema.message.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatRequest,
     GuiAgentInterpreterChatRequestList,
     GuiAgentInterpreterChatResponse,
     GuiAgentInterpreterChatResponseAny,
-    GuiAgentInterpreterChatResponseAnyAsync,
-    GuiAgentInterpreterChatResponseGenerator,
 )
 from gui_agent_loop_core.util.gui_agent_stream_wrapper import GuiAgentStreamWrapper
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug

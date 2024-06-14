@@ -1,13 +1,8 @@
 import gradio as gr
 
-from gui_agent_loop_core.backend.server_impl_common import update_agent_image
+from gui_agent_loop_core.backend.server_impl_common import get_gui_common_component
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
-
-STATE_INIT = "init"
-STATE_RUNNING = "running"
-STATE_STOP = "stop"
-g_last_user_message_content = "N/A"
-g_current_state = STATE_INIT
+from gui_agent_loop_core.schema.backend.schema import GuiBackendType, GuiComponentName
 
 
 def _create_interface_chat(interpreter_manager: InterpreterManager):
@@ -15,15 +10,12 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
 
     # Gradioインターフェースを複数持つ構成
     with gr.Blocks() as app:
-        # image
-        agent_image = gr.Image(value=update_agent_image("AGENT_EXECUTOR"), width=128, height=128, label="Agent Image")
-        # state
-        state_label = gr.Label(label="state", value=STATE_INIT)
-        # agentの種類を表示するためのLabel
-        agent_name_label = gr.Label(label="Agent Name", value="")
-        # session
-        agent_session = gr.State(interpreter_manager.create_session_instance())
-        print("agent_session.session_id=", agent_session.value.session_id)
+        component_dict = get_gui_common_component(GuiBackendType.GRADIO, interpreter_manager.create_session_instance())
+        agent_name = component_dict[GuiComponentName.AGENT_NAME]
+        agent_name_radio = component_dict[GuiComponentName.AGENT_NAME_RADIO]
+        agent_image = component_dict[GuiComponentName.AGENT_IMAGE]
+        agent_state = component_dict[GuiComponentName.AGENT_STATE]
+        agent_session = component_dict[GuiComponentName.AGENT_SESSION]
 
         # chat_iface
         input_textbox = gr.Textbox(
@@ -41,7 +33,7 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         chat_iface = gr.ChatInterface(
             fn=interpreter_manager.chat,
             title="Chatbot",
-            description=f"チャットボット({agent_name_label})との会話",
+            description=f"チャットボット({agent_name})との会話",
             theme="soft",
             textbox=input_textbox,
             chatbot=chatbot,
@@ -61,13 +53,6 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         # 外部トリガの結果を表示するためのTextareaBlock
         output_block = gr.Textbox(label="出力メッセージ")
 
-        # agent_name_labelの出力が変更されたときにagentのアイコンを更新
-        agent_name_label.change(
-            fn=update_agent_image,
-            inputs=[agent_name_label],
-            outputs=[agent_image],
-        )
-
         # 定期実行(auto_chat)
         app.load(
             fn=interpreter_manager.auto_chat,
@@ -75,13 +60,13 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
             every=60,  # every:sec
         )
         # 定期実行(STATE_STOP検知)
-        app.load(fn=interpreter_manager.update_state_view, outputs=[state_label], every=3)
+        app.load(fn=interpreter_manager.update_state_view, outputs=[agent_state], every=3)
         # 定期実行(agent_name検知)
-        app.load(fn=interpreter_manager.update_agent_name_view, outputs=[agent_name_label], every=3)
+        app.load(fn=interpreter_manager.update_agent_name_view, outputs=[agent_name], every=3)
 
         # イベントチェイン(ボタンを押したらRUNNINGにする)
-        chat_iface.textbox.submit(fn=interpreter_manager.change_state_running, outputs=[state_label])
-        chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[state_label])
+        chat_iface.textbox.submit(fn=interpreter_manager.change_state_running, outputs=[agent_state])
+        chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[agent_state])
 
     print("create_interface_chat end")
     return app, chat_iface, chatbot

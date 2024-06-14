@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from gui_agent_loop_core.converter.request_converter import RequestConverter
 from gui_agent_loop_core.converter.request_converter_str import RequestConverterStr
 from gui_agent_loop_core.converter.response_converter_str import ResponseConverterStr
-from gui_agent_loop_core.schema.schema import (
+from gui_agent_loop_core.schema.message.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatRequestAny,

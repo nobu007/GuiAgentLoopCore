@@ -2,7 +2,7 @@
 
 from gui_agent_loop_core.backend.server_impl_gradio import server
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
-from gui_agent_loop_core.schema.schema import GuiAgentInterpreterABC
+from gui_agent_loop_core.schema.message.schema import GuiAgentInterpreterABC
 
 
 class GuiAgentLoopCore:

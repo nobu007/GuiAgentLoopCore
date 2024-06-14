@@ -1,8 +1,11 @@
 import gradio as gr
 
-from gui_agent_loop_core.backend.server_impl_common import update_agent_image
+from gui_agent_loop_core.backend.server_impl_common import get_gui_common_component
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
-from gui_agent_loop_core.schema.schema import (
+from gui_agent_loop_core.schema.backend.schema import GuiBackendType, GuiComponentName
+from gui_agent_loop_core.schema.core.schema import InterpreterState
+from gui_agent_loop_core.schema.message.schema import (
+    AgentName,
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatRequestAny,
     GuiAgentInterpreterChatResponseAny,
@@ -11,26 +14,20 @@ from gui_agent_loop_core.schema.schema import (
 
 def sandbox_server(interpreter_manager: InterpreterManager):
     with gr.Blocks() as app:
-        agent_name = gr.Label(label="Agent Name", value="AGENT_EXECUTOR")
-        agent_name_radio = gr.Radio(
-            choices=["AGENT_EXECUTOR", "SUPERVISOR"], value="AGENT_EXECUTOR", label="Select Agent"
-        )
-        agent_image = gr.Image(value=update_agent_image("AGENT_EXECUTOR"), width=128, height=128, label="Agent Image")
-        agent_session = gr.State(interpreter_manager.create_session_instance())
+        component_dict = get_gui_common_component(GuiBackendType.GRADIO, interpreter_manager.create_session_instance())
+        agent_name = component_dict[GuiComponentName.AGENT_NAME]
+        agent_name_radio = component_dict[GuiComponentName.AGENT_NAME_RADIO]
+        agent_image = component_dict[GuiComponentName.AGENT_IMAGE]
+        agent_state = component_dict[GuiComponentName.AGENT_STATE]
+        agent_session = component_dict[GuiComponentName.AGENT_SESSION]
         print("agent_session.session_id=", agent_session.value.session_id)
 
         def _change_agent(agent_name):
             print("_change_agent agent_name=", agent_name)
-            if agent_name == "AGENT_EXECUTOR":
-                print("  ->", "SUPERVISOR")
-                return "SUPERVISOR"
+            if agent_name == AgentName.AGENT_EXECUTOR.value:
+                return AgentName.SUPERVISOR.value
             else:
-                print("  ->", "AGENT_EXECUTOR")
-                return "AGENT_EXECUTOR"
-
-        def _notify(agent_name):
-            print("_notify agent_name=", agent_name)
-            return agent_name
+                return AgentName.AGENT_EXECUTOR.value
 
         app.load(
             fn=_change_agent,
@@ -38,8 +35,6 @@ def sandbox_server(interpreter_manager: InterpreterManager):
             outputs=[agent_name_radio],
             every=3,
         )
-        agent_name.change(fn=_notify, inputs=[agent_name], outputs=[agent_name_radio])
-        agent_name_radio.change(fn=update_agent_image, inputs=[agent_name_radio], outputs=[agent_image])
 
     app.queue()
     app.launch(server_name="0.0.0.0", debug=True)

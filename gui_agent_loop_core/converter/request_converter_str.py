@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Type, Union
+from typing import List, Type, Union
 
 from pydantic import BaseModel
 
 from gui_agent_loop_core.converter.base_converter import BaseConverter
-from gui_agent_loop_core.schema.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
+from gui_agent_loop_core.schema.message.schema import GuiAgentInterpreterChatRequest, GuiAgentInterpreterChatRequestAny
 
 CoreAny = Union[str, BaseModel, List[BaseModel]]
 

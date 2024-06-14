@@ -3,7 +3,7 @@
 import click
 
 from gui_agent_loop_core.gui_agent_loop_core import GuiAgentLoopCore
-from gui_agent_loop_core.schema.schema import (
+from gui_agent_loop_core.schema.message.schema import (
     GuiAgentInterpreterABC,
     GuiAgentInterpreterBase,
     GuiAgentInterpreterChatRequestAny,

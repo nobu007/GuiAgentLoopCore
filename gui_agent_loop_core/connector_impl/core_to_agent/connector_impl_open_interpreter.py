@@ -3,9 +3,8 @@ from typing import List, Union
 from pydantic import BaseModel
 
 from gui_agent_loop_core.converter.request_converter import RequestConverter
-from gui_agent_loop_core.schema.schema import (
+from gui_agent_loop_core.schema.message.schema import (
     GuiAgentInterpreterABC,
-    GuiAgentInterpreterChatRequest,
     GuiAgentInterpreterChatRequestAny,
     GuiAgentInterpreterChatResponse,
 )

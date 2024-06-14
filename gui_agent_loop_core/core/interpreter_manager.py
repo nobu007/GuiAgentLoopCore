@@ -4,19 +4,7 @@ from typing import Generator, Tuple
 import jwt
 from langchain.memory import ConversationBufferWindowMemory
 
-from gui_agent_loop_core.schema.schema import (
-    AgentName,
-    GuiAgentInterpreterABC,
-    GuiAgentInterpreterChatMessage,
-    GuiAgentInterpreterChatRequest,
-    GuiAgentInterpreterChatRequestList,
-    GuiAgentInterpreterChatResponse,
-    GuiAgentInterpreterChatResponseAny,
-    GuiAgentInterpreterChatResponseAnyAsync,
-    GuiAgentInterpreterChatResponseGenerator,
-    GuiAgentInterpreterManagerBase,
-    InterpreterState,
-)
+from gui_agent_loop_core.schema.message.schema import AgentName, GuiAgentInterpreterManagerBase, InterpreterState
 from gui_agent_loop_core.util.message_format import show_data_debug
 from gui_agent_loop_core.util.message_process import process_messages_gradio
 
