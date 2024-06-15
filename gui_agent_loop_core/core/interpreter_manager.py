@@ -1,3 +1,4 @@
+import os
 import uuid
 from typing import Generator, Tuple
 
@@ -106,6 +107,8 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         if self.current_state == InterpreterState.STATE_STOP:
             # シミュレートされた入力を生成する
             simulated_input = "会話履歴で状況を確認してから自動的に処理を続けてください。"
+            simulated_input = os.environ.get("AUTO_CHAT_PROMPT", simulated_input)
+            print("simulated_input=", simulated_input)
             self.current_state = InterpreterState.STATE_RUNNING
             yield from self.chat(simulated_input, is_auto=True)
         elif self.current_state == InterpreterState.STATE_RUNNING:

@@ -1,3 +1,5 @@
+import os
+
 import gradio as gr
 
 from gui_agent_loop_core.backend.server_impl_common import get_gui_common_component
@@ -23,9 +25,10 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
             container=False,
             scale=7,
             render=False,
+            value=os.environ.get("INITIAL_PROMPT"),
         )
         chatbot = gr.Chatbot(
-            placeholder="こんにちは！何かお手伝いできることはありますか？",
+            placeholder="ここにAIの出力結果が表示されます",
             container=False,
             scale=7,
             render=False,

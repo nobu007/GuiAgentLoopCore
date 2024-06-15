@@ -1,3 +1,4 @@
+import os
 from typing import List, Union
 
 from pydantic import BaseModel
@@ -34,30 +35,42 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         request_dict_list_inner = request_converter.to_dict_from_core(request_core)
 
         # chat
-        print("chat_core request_inner=", request_dict_list_inner)
+        print("chat_core request_dict_list_inner=", request_dict_list_inner)
         # response_inner = self.chat(request_dict_list_inner, display, stream, blocking)
         last_message = request_dict_list_inner[-1]["content"]
         full_message = request_dict_list_inner
         full_message_str = str(request_dict_list_inner)
+        print("chat_core last_message=", last_message)
+        if last_message == os.environ.get("AUTO_CHAT_PROMPT"):
+            # プロンプト節約のため履歴を使わない方式なので初期プロンプトを毎回入れる
+            last_message = os.environ.get("INITIAL_PROMPT", last_message)
         print("chat_core last_message=", last_message)
 
         stream = False  # ChainExecutor' object has no attribute 'stream'
         if stream:
             # last_message: str
             # response_inner: CodeInterpreterResponse
+
+            # ======= ↓↓↓↓ LLM invoke ↓↓↓↓ #=======
             response_inner = self.session.generate_response_stream(last_message)
+            # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
+
             for chunk_inner in response_inner:
                 chunk_inner = str(chunk_inner)  # for error case
                 print("chat_core response_inner chunk_inner=", chunk_inner)
 
                 # inner -> core
-                response_core = request_converter_str.to_core_from_single_str(last_message)
+                response_core = request_converter_str.to_core_from_single_str(chunk_inner)
                 response_core.role = GuiAgentInterpreterChatMessage.Role.ASSISTANT
                 yield response_core
         else:
             # last_message: str
             # response_inner: CodeInterpreterResponse
+
+            # ======= ↓↓↓↓ LLM invoke ↓↓↓↓ #=======
             response_inner = self.session.generate_response(last_message)
+            # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
+
             print("response_inner=", response_inner)
             response_inner_str = str(response_inner.content)  # workaround
             response_inner_code_log_str = str(response_inner.code_log)  # workaround
