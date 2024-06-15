@@ -23,6 +23,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         stream=False,
         blocking=True,
     ) -> GuiAgentInterpreterChatResponseAny:
+        print("chat_core request_core=", request_core)
         request_converter = RequestConverter()
         request_converter_str = RequestConverterStr()
         response_converter_str = ResponseConverterStr()

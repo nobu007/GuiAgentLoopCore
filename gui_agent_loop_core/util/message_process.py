@@ -17,11 +17,15 @@ from gui_agent_loop_core.util.gui_agent_stream_wrapper import GuiAgentStreamWrap
 from gui_agent_loop_core.util.message_format import format_response, show_data_debug
 
 
-def convert_messages(
+def convert_core_from_langchain_messages(
     langchain_messages: list[BaseMessage],
 ) -> GuiAgentInterpreterChatRequestList:
     request_core_list = []
     for message in langchain_messages:
+        show_data_debug(
+            message,
+            "langchain_message",
+        )
         converted_message = GuiAgentInterpreterChatRequest()
         if isinstance(message, HumanMessage):
             converted_message.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
@@ -48,7 +52,7 @@ def is_last_user_message_content_remain(last_user_message_content, converted_mes
     return False
 
 
-def process_messages_gradio(
+def prepare_and_process_messages(
     last_user_message_content: str,
     new_query: str,
     interpreter: GuiAgentInterpreterABC,
@@ -56,23 +60,20 @@ def process_messages_gradio(
 ) -> GuiAgentInterpreterChatResponseAny:
     try:
         # Get the next message from the queue
-        new_request = GuiAgentInterpreterChatRequest()
-        new_request.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
-        new_request.role = GuiAgentInterpreterChatMessage.Role.USER
-        new_request.content = new_query
+        new_request = GuiAgentInterpreterChatRequest.user(new_query)
+        print("add new_query=", new_query)
+        print("add new_request=", new_request)
 
         # messages from history
         messages = memory.load_memory_variables({})["history"]
-        request_core_list = convert_messages(messages)
+        request_core_list = convert_core_from_langchain_messages(messages)
 
         if last_user_message_content != new_query:
             # is_auto=Trueの場合はここを通る
             if not is_last_user_message_content_remain(last_user_message_content, request_core_list):
                 # ユーザ入力を忘れたので追加する
-                last_user_message = GuiAgentInterpreterChatRequest()
-                last_user_message.type = GuiAgentInterpreterChatMessage.Type.MESSAGE
-                last_user_message.role = GuiAgentInterpreterChatMessage.Role.USER
-                last_user_message.content = last_user_message_content
+                print("add last_user_message_content=", last_user_message_content)
+                last_user_message = GuiAgentInterpreterChatRequest.user(last_user_message_content)
                 request_core_list.insert(0, last_user_message)
 
         request_core_list.append(new_request)
@@ -84,11 +85,13 @@ def process_messages_gradio(
         )
 
         response_list = []
+
+        # ======= ↓↓↓↓ LLM invoke ↓↓↓↓ #=======
         response_chunks = process_and_format_message(request_core_list, interpreter)
-        # print("process_messages_gradio response_chunks=", response_chunks)
+        # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
+
         for chunk in response_chunks:
             # Send out assistant message chunks
-            # print("process_messages_gradio response=", chunk)
             yield chunk
             response_list.append(chunk.content)
         full_response = "".join(response_list)

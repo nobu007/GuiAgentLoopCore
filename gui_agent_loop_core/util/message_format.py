@@ -185,4 +185,4 @@ def show_data_debug_other(indent, data):
     """
     stype = str(type(data))
     s = str(data)
-    print(f"{indent}{s[:20]}[type={stype}]")
+    print(f"{indent}type={stype}, data={s[:20]}")

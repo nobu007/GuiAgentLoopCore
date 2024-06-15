@@ -24,7 +24,7 @@ class BaseConverter(BaseModel):
         else:
             raise ValueError("Invalid input type. Expected CoreAny (str, BaseModel, or list of BaseModel).")
 
-    def _to_dict_list_from_core_list(self, core_list: List[BaseModel], core_class: Type[BaseModel]) -> dict:
+    def _to_dict_list_from_core_list(self, core_list: List[BaseModel], core_class: Type[BaseModel]) -> List[dict]:
         return [self._to_dict_from_core(core) for core in core_list if isinstance(core, core_class)]
 
     def _to_dict_from_core(self, core: BaseModel) -> dict:

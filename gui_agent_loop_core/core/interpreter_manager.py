@@ -6,7 +6,7 @@ from langchain.memory import ConversationBufferWindowMemory
 
 from gui_agent_loop_core.schema.message.schema import AgentName, GuiAgentInterpreterManagerBase, InterpreterState
 from gui_agent_loop_core.util.message_format import show_data_debug
-from gui_agent_loop_core.util.message_process import process_messages_gradio
+from gui_agent_loop_core.util.message_process import prepare_and_process_messages
 
 
 class InterpreterManager(GuiAgentInterpreterManagerBase):
@@ -85,7 +85,9 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         self.current_state = InterpreterState.STATE_RUNNING
         print("chat self.current_state=", self.current_state)
         response = ""
-        for chunk in process_messages_gradio(self.last_user_message_content, new_query, self.interpreter, self.memory):
+        for chunk in prepare_and_process_messages(
+            self.last_user_message_content, new_query, self.interpreter, self.memory
+        ):
             response += chunk.content
             print("chat chunk.agent_name=", chunk.agent_name)
             if chunk.agent_name != str(AgentName.OTHER):

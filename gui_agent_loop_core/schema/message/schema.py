@@ -10,7 +10,7 @@ from gui_agent_loop_core.schema.core.schema import AgentName, InterpreterState
 
 
 class GuiAgentInterpreterChatMessage(BaseModel):
-    """First message to GuiAgentInterprete"""
+    """First message to GuiAgentInterpreter"""
 
     class Type(str, enum.Enum):
         MESSAGE = "message"
@@ -60,6 +60,12 @@ class GuiAgentInterpreterChatMessage(BaseModel):
     def system(content: str) -> "GuiAgentInterpreterChatMessage":
         return GuiAgentInterpreterChatMessage(role=GuiAgentInterpreterChatMessage.Role.SYSTEM, content=content)
 
+    def __str__(self):
+        return "(GAI msg)role:" + self.role + ", content:" + self.content
+
+    def __repr__(self):
+        return "(GAI msg)role:" + self.role + ", content:" + self.content
+
 
 class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
     """Response message from GuiAgentInterprete"""
@@ -85,10 +91,38 @@ class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
     end: Optional[bool] = False  # indicate last frame of chunks
     agent_name: Optional[AgentName] = AgentName.OTHER
 
+    @staticmethod
+    def user(content: str) -> "GuiAgentInterpreterChatResponse":
+        return GuiAgentInterpreterChatResponse(role=GuiAgentInterpreterChatMessage.Role.USER, content=content)
+
+    @staticmethod
+    def system(content: str) -> "GuiAgentInterpreterChatResponse":
+        return GuiAgentInterpreterChatResponse(role=GuiAgentInterpreterChatMessage.Role.SYSTEM, content=content)
+
+    def __str__(self):
+        return "(GAI res)role:" + self.role + ", content:" + self.content
+
+    def __repr__(self):
+        return "(GAI res)role:" + self.role + ", content:" + self.content
+
 
 class GuiAgentInterpreterChatRequest(GuiAgentInterpreterChatResponse):
     """Second or later message to GuiAgentInterprete
     This class handle multi turn conversation."""
+
+    @staticmethod
+    def user(content: str) -> "GuiAgentInterpreterChatRequest":
+        return GuiAgentInterpreterChatRequest(role=GuiAgentInterpreterChatMessage.Role.USER, content=content)
+
+    @staticmethod
+    def system(content: str) -> "GuiAgentInterpreterChatRequest":
+        return GuiAgentInterpreterChatRequest(role=GuiAgentInterpreterChatMessage.Role.SYSTEM, content=content)
+
+    def __str__(self):
+        return "(GAI req)role:" + self.role + ", content:" + self.content
+
+    def __repr__(self):
+        return "(GAI req)role:" + self.role + ", content:" + self.content
 
 
 # Naming rules

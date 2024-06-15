@@ -24,7 +24,8 @@ class RequestConverter(DictFlattenConverter):
         core_list = super().to_core_list_from_core_any(core_any, core_class)
         dict_list = super()._to_dict_list_from_core_list(core_list, GuiAgentInterpreterChatRequest)
         converted_dict_list = []
-        for core, dict_item in zip(core_list, dict_list):
+        for dict_item in dict_list:
+            print("to_dict_from_core dict_item=", dict_item)
             converted_dict_item = self.convert(dict_item)
             converted_dict_list.append(converted_dict_item)
         return converted_dict_list
