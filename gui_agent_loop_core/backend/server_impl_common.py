@@ -53,6 +53,8 @@ def get_agent_image_path(agent_name):
         agent_image_filename = "llm_planner_icon.png"
     elif agent_name == AgentName.THOUGHT:
         agent_image_filename = "thought_icon.png"
+    elif agent_name == AgentName.CREW:
+        agent_image_filename = "crew_icon.png"
     else:
         pass
 

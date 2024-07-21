@@ -6,6 +6,7 @@ class AgentName(str, enum.Enum):
     LLM_PLANNER = "llm_planner"
     SUPERVISOR = "supervisor"
     THOUGHT = "thought"
+    CREW = "crew"
     OTHER = "other"
 
     def __str__(self):
