@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel
 
@@ -46,7 +46,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             last_message = os.environ.get("INITIAL_PROMPT", last_message)
         print("chat_core last_message=", last_message)
 
-        stream = False  # ChainExecutor' object has no attribute 'stream'
+        stream = True  # ChainExecutor' object has no attribute 'stream'
         if stream:
             # last_message: str
             # response_inner: CodeInterpreterResponse
