@@ -52,7 +52,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             # response_inner: CodeInterpreterResponse
 
             # ======= ↓↓↓↓ LLM invoke ↓↓↓↓ #=======
-            response_inner = self.session.generate_response_stream(last_message)
+            response_inner = self.session.generate_response_stream(request_dict_list_inner)
             # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
 
             for chunk_inner in response_inner:
@@ -60,7 +60,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
                 print("chat_core response_inner chunk_inner=", chunk_inner)
 
                 # inner -> core
-                response_core = request_converter_str.to_core_from_single_str(chunk_inner)
+                response_core = response_converter_str.to_core_from_single_str(chunk_inner)
                 response_core.role = GuiAgentInterpreterChatMessage.Role.ASSISTANT
                 yield response_core
         else:
