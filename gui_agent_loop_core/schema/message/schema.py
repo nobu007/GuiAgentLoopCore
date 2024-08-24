@@ -1,10 +1,10 @@
 import enum
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, AsyncGenerator, Generator, List, Optional, Type, Union, get_args, get_origin
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Type, Union, get_args, get_origin
 
 from langchain.memory import ConversationBufferWindowMemory
-from pydantic import BaseModel, validate_call
+from pydantic import BaseModel, Field, validate_call
 
 from gui_agent_loop_core.schema.core.schema import AgentName, InterpreterState
 
@@ -86,10 +86,12 @@ class GuiAgentInterpreterChatResponse(GuiAgentInterpreterChatMessage):
 
     format: Optional[Format] = Format.OUTPUT
     code: Optional[str] = ""  # working change(may nothing set)
+    log: Optional[str] = ""  # code execute result and so on
     language: Optional[str] = ""  # working change(may nothing set)
     start: Optional[bool] = False  # indicate first frame of chunks
     end: Optional[bool] = False  # indicate last frame of chunks
     agent_name: Optional[AgentName] = AgentName.OTHER
+    thought: Optional[str] = ""  # agent's thought(both intermediate and final)
 
     @staticmethod
     def user(content: str) -> "GuiAgentInterpreterChatResponse":

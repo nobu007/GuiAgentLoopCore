@@ -106,7 +106,11 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         print("auto_chat self.current_state=", self.current_state)
         if self.current_state == InterpreterState.STATE_STOP:
             # シミュレートされた入力を生成する
-            simulated_input = "会話履歴で状況を確認してから自動的に処理を続けてください。"
+            simulated_input = """次のステップで作業を継続してください。
+            １．最新のコード状況を確認する(work配下のソース参照)
+            ２．会話履歴や発生しているエラー状況を確認する
+            ３．最終的な目的を達成するために必要な作業を実施する
+            計画は段階的に詳細化して効率的に進めてください。"""
             simulated_input = os.environ.get("AUTO_CHAT_PROMPT", simulated_input)
             print("simulated_input=", simulated_input)
             self.current_state = InterpreterState.STATE_RUNNING
