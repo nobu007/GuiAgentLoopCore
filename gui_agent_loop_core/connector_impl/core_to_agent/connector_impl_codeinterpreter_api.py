@@ -1,14 +1,13 @@
-import os
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 from dataclasses import fields, is_dataclass
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from pydantic import BaseModel
 
 from gui_agent_loop_core.converter.request_converter import RequestConverter
-from gui_agent_loop_core.converter.request_converter_str import RequestConverterStr
 from gui_agent_loop_core.converter.response_converter_str import ResponseConverterStr
 from gui_agent_loop_core.schema.message.schema import (
+    BaseMessageContent,
     GuiAgentInterpreterABC,
     GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatRequest,
@@ -16,9 +15,6 @@ from gui_agent_loop_core.schema.message.schema import (
     GuiAgentInterpreterChatResponse,
     GuiAgentInterpreterChatResponseAny,
 )
-
-CoreAny = Union[str, BaseModel, List[BaseModel]]
-BaseMessageContent = Union[str, List[Union[str, Dict]]]
 
 
 class DummySession:
@@ -44,16 +40,20 @@ class DummySession:
     ]
 
     def generate_response(self, messages: BaseMessageContent) -> Any:
+        print("generate_response messages=", messages)
         return DummySession.DummyResponsePydantic(content="DummyResponsePydantic")
 
     def generate_response_stream(self, messages: BaseMessageContent) -> Iterator[Any]:
+        print("generate_response_stream messages=", messages)
         for i in range(4):
             yield DummySession.DUMMY_RESPONSE_DATA_SET[i]
 
     async def agenerate_response(self, messages: BaseMessageContent) -> Any:
+        print("agenerate_response messages=", messages)
         return DummySession.DummyResponseDataClass(content="DummyResponseDataClass")
 
     async def agenerate_response_stream(self, messages: BaseMessageContent) -> Any:
+        print("agenerate_response_stream messages=", messages)
         yield DummySession.DUMMY_RESPONSE_DICT
 
 
@@ -97,7 +97,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
                 if response_core.end:
                     yield response_core
         else:
-            # last_message: str
+            # TODO: use blocking flag
             # response_inner: CodeInterpreterResponse
 
             # ======= ↓↓↓↓ LLM invoke ↓↓↓↓ #=======

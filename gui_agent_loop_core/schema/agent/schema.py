@@ -1,6 +1,7 @@
 import enum
 from typing import Any, Dict, Optional
 
+from langchain.agents import AgentExecutor
 from langchain_core.prompts.chat import BaseMessagePromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
 from pydantic import BaseModel
 
@@ -23,7 +24,7 @@ class AgentDefinition(BaseModel):
     agent_expected_output: Optional[str] = ""
     agent_acceptable_task_description: Optional[str] = ""
     agent: Optional[Any] = None
-    agent_executor: Optional[Any] = None
+    agent_executor: Optional[AgentExecutor] = None
     prompt: Optional[ChatPromptTemplate] = None
     prompt_dict: Optional[Dict[str, Any]] = None
     message_prompt_template: Optional[BaseMessagePromptTemplate] = None

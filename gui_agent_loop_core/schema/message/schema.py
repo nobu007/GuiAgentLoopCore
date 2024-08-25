@@ -4,9 +4,11 @@ from abc import ABC, abstractmethod
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Type, Union, get_args, get_origin
 
 from langchain.memory import ConversationBufferWindowMemory
-from pydantic import BaseModel, Field, validate_call
+from pydantic import BaseModel, validate_call
 
 from gui_agent_loop_core.schema.core.schema import AgentName, InterpreterState
+
+BaseMessageContent = Union[str, List[Union[str, Dict]]]
 
 
 class GuiAgentInterpreterChatMessage(BaseModel):
