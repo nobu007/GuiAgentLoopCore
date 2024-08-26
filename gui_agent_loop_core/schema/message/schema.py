@@ -8,7 +8,8 @@ from pydantic import BaseModel, validate_call
 
 from gui_agent_loop_core.schema.core.schema import AgentName, InterpreterState
 
-BaseMessageContent = Union[str, List[Union[str, Dict]]]
+BaseMessageContentItem = Union[str, Dict]
+BaseMessageContent = Union[str, List[BaseMessageContentItem]]
 
 
 class GuiAgentInterpreterChatMessage(BaseModel):
