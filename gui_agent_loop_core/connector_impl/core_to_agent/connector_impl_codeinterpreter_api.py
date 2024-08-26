@@ -94,8 +94,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             for chunk_inner in response_inner:
                 print("chat_core response_inner chunk_inner=", chunk_inner)
                 response_core = self.handle_response(chunk_inner)
-                if response_core.end:
-                    yield response_core
+                yield response_core
         else:
             # TODO: use blocking flag
             # response_inner: CodeInterpreterResponse
@@ -115,6 +114,8 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
 
         # GuiAgentInterpreterChatResponseの全メンバ名を取得
         response_inner_attributes = self.get_attributes(response_inner)
+        print("handle_response type(response_inner)=", type(response_inner))
+        print("response_inner_attributes=", response_inner_attributes)
 
         # 辞書の場合の処理
         for response_inner_attr in response_inner_attributes:
@@ -139,7 +140,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
 
         if is_dataclass(response_inner):
             attributes = [field.name for field in fields(response_inner)]
-        elif is_dataclass(response_inner):
+        elif isinstance(response_inner, BaseModel):
             attributes = [
                 attr
                 for attr in dir(response_inner)
