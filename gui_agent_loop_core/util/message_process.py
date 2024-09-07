@@ -91,6 +91,7 @@ def prepare_and_process_messages(
         # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
 
         for chunk in response_chunks:
+            print("prepare_and_process_messages chunk=", chunk)
             # Send out assistant message chunks
             yield chunk
             response_list.append(chunk.content)
