@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 前のコードは変更なし -->
+</head>
+<body>
+    <div id="graph-container"></div>
+    <pre id="file-content"></pre>
+
+    <script>
+        // 動的にバックエンドのURLを取得
+        const API_URL = `http://${window.location.hostname}:9000`;
+
+        async function fetchFiles() {
+            try {
+                const response = await fetch(`${API_URL}/files`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (e) {
+                console.error("Error fetching files:", e);
+                return { nodes: [], edges: [] };
+            }
+        }
+
+        async function fetchFileContent(filePath) {
+            try {
+                const response = await fetch(`${API_URL}/file/${filePath}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (e) {
+                console.error("Error fetching file content:", e);
+                return { content: "Error fetching file content" };
+            }
+        }
+
+        // 残りのコードは変更なし
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - BACKEND_DIR=/app/backend
+    networks:
+      - app-network
+    hostname: backend
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - app-network
+    hostname: frontend
+
+networks:
+  app-network:
+    driver: bridge
