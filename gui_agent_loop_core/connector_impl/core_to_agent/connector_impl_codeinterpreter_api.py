@@ -77,7 +77,7 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         request_dict_list_inner = request_converter.to_dict_from_core(request_core)
 
         # chat
-        print("chat_core request_dict_list_inner=", request_dict_list_inner)
+        print("chat_core request_dict_list_inner size=", len(request_dict_list_inner))
         # response_inner = self.chat(request_dict_list_inner, display, stream, blocking)
         last_message = request_dict_list_inner[-1]["content"]
         print("chat_core last_message=", last_message)
@@ -92,7 +92,6 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
 
             for chunk_inner in response_inner:
-                print("chat_core response_inner chunk_inner=", chunk_inner)
                 response_core = self.handle_response(chunk_inner)
                 yield response_core
         else:
@@ -103,7 +102,6 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
             response_inner = self.session.generate_response(last_message)
             # ======= ↑↑↑↑ LLM invoke ↑↑↑↑ #=======
 
-            print("response_inner=", response_inner)
             response_core = self.handle_response(chunk_inner)
             yield response_core
 
