@@ -23,6 +23,7 @@ class AgentDefinition(BaseModel):
     agent_role: Optional[str] = ""
     agent_expected_output: Optional[str] = ""
     agent_acceptable_task_description: Optional[str] = ""
+    agent_tools: Optional[str] = ""
     agent: Optional[Any] = None
     agent_executor: Optional[AgentExecutor] = None
     prompt: Optional[ChatPromptTemplate] = None
