@@ -139,16 +139,14 @@ class ConnectorImplCodeinterpreterApi(GuiAgentInterpreterABC):
         if is_dataclass(response_inner):
             attributes = [field.name for field in fields(response_inner)]
         elif isinstance(response_inner, BaseModel):
-            attributes = [
-                attr
-                for attr in dir(response_inner)
-                if not callable(getattr(response_inner, attr)) and not attr.startswith("_")
-            ]
+            # __dict__を使用して属性を取得
+            attributes = [attr for attr in response_inner.__dict__.keys() if not attr.startswith("_")]
         elif hasattr(response_inner, "__dict__"):
             attributes = response_inner.__dict__.keys()
         else:
             # default
             attributes = ["content", "thought", "code", "agent_name"]
+
         return attributes
 
 
