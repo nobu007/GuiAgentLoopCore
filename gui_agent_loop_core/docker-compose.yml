@@ -3,24 +3,27 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
+      context: ./llm_code_navigator/backend
       dockerfile: Dockerfile
+    image: llm_code_navigator-backend_test
     ports:
       - "9000:9000"
     volumes:
-      - ./backend:/app/backend
+      - ./work:/app/work
     environment:
-      - BACKEND_DIR=/app/backend
+      - BACKEND_DIR=/app/work
     networks:
       - app-network
     hostname: backend
+    entrypoint: ["python", "-m", "app.main"]
 
   frontend:
-    image: nginx:alpine
+    build:
+      context: ./llm_code_navigator/frontend
+      dockerfile: Dockerfile
+    image: llm_code_navigator-frontend_test
     ports:
-      - "80:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html
+      - "3001:3001"
     networks:
       - app-network
     hostname: frontend
