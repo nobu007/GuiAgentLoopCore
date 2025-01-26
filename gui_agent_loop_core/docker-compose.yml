@@ -1,11 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
     build:
-      context: ./llm_code_navigator/backend
+      context: ./backend
       dockerfile: Dockerfile
-    image: llm_code_navigator-backend_test
+    image: gui_agent_loop_core-backend
     ports:
       - "9000:9000"
     volumes:
@@ -15,18 +15,7 @@ services:
     networks:
       - app-network
     hostname: backend
-    entrypoint: ["python", "-m", "app.main"]
-
-  frontend:
-    build:
-      context: ./llm_code_navigator/frontend
-      dockerfile: Dockerfile
-    image: llm_code_navigator-frontend_test
-    ports:
-      - "3001:3001"
-    networks:
-      - app-network
-    hostname: frontend
+    # entrypoint: ["python", "-m", "app.main"]
 
 networks:
   app-network:
