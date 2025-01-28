@@ -371,12 +371,20 @@ class GuiAgentInterpreterManagerBase(BaseModel):
         return self._interpreter
 
     @validate_call
+    def chat_gradio_like(self, user_message: str, history: list[tuple[str, str]]) -> str:
+        # dummy
+        print("chat_gradio_like user_message=", user_message)
+        return user_message
+
+    @validate_call
     def chat(self, new_query: str, is_auto: bool = False) -> str:
+        # dummy
         print("is_auto=", is_auto)
         return new_query
 
     @validate_call
     def auto_chat(self) -> str:
+        # dummy
         return ""
 
     class ConfigDict:

@@ -6,7 +6,9 @@ from gui_agent_loop_core.schema.backend.schema import GuiBackendType, GuiCompone
 from gui_agent_loop_core.schema.message.schema import (
     AgentName,
     GuiAgentInterpreterABC,
+    GuiAgentInterpreterChatMessage,
     GuiAgentInterpreterChatRequestAny,
+    GuiAgentInterpreterChatResponse,
     GuiAgentInterpreterChatResponseAny,
 )
 
@@ -50,7 +52,11 @@ class DummyGuiAgentInterpreter(GuiAgentInterpreterABC):
         print("display=", display)
         print("stream=", stream)
         print("blocking=", blocking)
-        return request_core
+
+        response_core = GuiAgentInterpreterChatResponse()
+        response_core.role = GuiAgentInterpreterChatMessage.Role.ASSISTANT
+        response_core.content = request_core.content + "\nchat_core response."
+        return response_core
 
 
 if __name__ == "__main__":

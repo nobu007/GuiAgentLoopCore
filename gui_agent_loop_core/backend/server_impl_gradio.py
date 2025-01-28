@@ -6,6 +6,12 @@ from gui_agent_loop_core.backend.server_impl_common import get_gui_common_compon
 from gui_agent_loop_core.core.interpreter_manager import InterpreterManager
 from gui_agent_loop_core.schema.backend.schema import GuiBackendType, GuiComponentName
 
+# メッセージのリストを保持
+messages = []
+
+# メッセージの最大長を設定
+MAX_MESSAGE_LENGTH = 100
+
 
 def _create_interface_chat(interpreter_manager: InterpreterManager):
     print("create_interface_chat start")
@@ -34,7 +40,7 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
             render=False,
         )
         chat_iface = gr.ChatInterface(
-            fn=interpreter_manager.chat,
+            fn=interpreter_manager.chat_gradio_like,
             title="Chatbot",
             description=f"チャットボット({agent_name})との会話",
             theme="soft",
@@ -48,28 +54,28 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
                 "さらなる改善案を提案して内容を精査した上で作業を進めてください。",
             ],
             cache_examples=False,
-            retry_btn=None,
-            undo_btn="Delete Previous",
-            clear_btn="Clear",
+            # undo_btn="Delete Previous",
+            # clear_btn="Clear",
+            # submit_btn=True,
         )
 
         # 外部トリガの結果を表示するためのTextareaBlock
         output_block = gr.Textbox(label="出力メッセージ")
 
+        # タイマー
+        t60 = gr.Timer(60, active=False)
+        t3 = gr.Timer(3, active=False)
+
         # 定期実行(auto_chat)
-        app.load(
-            fn=interpreter_manager.auto_chat,
-            outputs=[output_block],
-            every=60,  # every:sec
-        )
+        t60.tick(interpreter_manager.auto_chat, outputs=[output_block])
         # 定期実行(STATE_STOP検知)
-        app.load(fn=interpreter_manager.update_state_view, outputs=[agent_state], every=3)
+        t3.tick(interpreter_manager.update_state_view, outputs=[agent_state])
         # 定期実行(agent_name検知)
-        app.load(fn=interpreter_manager.update_agent_name_view, outputs=[agent_name], every=3)
+        t3.tick(interpreter_manager.update_agent_name_view, outputs=[agent_name])
 
         # イベントチェイン(ボタンを押したらRUNNINGにする)
         chat_iface.textbox.submit(fn=interpreter_manager.change_state_running, outputs=[agent_state])
-        chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[agent_state])
+        # chat_iface.submit_btn.click(fn=interpreter_manager.change_state_running, outputs=[agent_state])
 
     print("create_interface_chat end")
     return app, chat_iface, chatbot
@@ -78,4 +84,4 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
 def server(interpreter_manager: InterpreterManager):
     # Gradioインターフェースを作成する
     app, _, _ = _create_interface_chat(interpreter_manager)
-    app.launch(server_name="0.0.0.0", debug=True)
+    app.launch(server_name="0.0.0.0", debug=True, allowed_paths=["/tmp", "/app/work", "/home", "/app/GuiAgentLoopCore"])

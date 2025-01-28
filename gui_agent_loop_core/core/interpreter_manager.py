@@ -5,7 +5,12 @@ from typing import Generator, Tuple
 import jwt
 from langchain.memory import ConversationBufferWindowMemory
 
-from gui_agent_loop_core.schema.message.schema import AgentName, GuiAgentInterpreterManagerBase, InterpreterState
+from gui_agent_loop_core.schema.message.schema import (
+    AgentName,
+    GuiAgentInterpreterChatResponseAny,
+    GuiAgentInterpreterManagerBase,
+    InterpreterState,
+)
 from gui_agent_loop_core.util.message_format import show_data_debug
 from gui_agent_loop_core.util.message_process import prepare_and_process_messages
 
@@ -72,7 +77,22 @@ class InterpreterManager(GuiAgentInterpreterManagerBase):
         self.secret_key = 'jwt_secret_key_2571'  # JWTの署名に使用するシークレットキー
 
     # チャットボットの応答を生成する関数
-    def chat(self, new_query: str, is_auto=False) -> Generator[Tuple[str], Tuple[str], None]:
+    def chat_gradio_like(
+        self, user_message: str, history: list[tuple[str, str]]
+    ) -> Generator[Tuple[str], Tuple[str], None]:
+        print("XXXX chat chat_gradio_like user_message=", user_message)
+        print("XXXX chat chat_gradio_like history=", history)
+
+        history.append({"role": "user", "content": user_message})
+        response_stream = self.chat(user_message, is_auto=False)
+        for response in response_stream:
+            history.append({"role": "assistant", "content": response})
+            yield response
+        history.append({"role": "assistant", "content": "生成完了"})
+
+    # チャットボットの応答を生成する関数
+    def chat(self, new_query: str, is_auto: bool = False) -> Generator[Tuple[str], Tuple[str], None]:
+        print("XXXX chat is_auto=", is_auto)
         show_data_debug(new_query, "new_query")
         if not new_query:
             print("skip no input")
