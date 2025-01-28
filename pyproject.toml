@@ -27,7 +27,7 @@ bump2version = {version = "*", optional = true}
 click = "^8.1.7"
 flake8 = {version = "^7.1.1", optional = true}
 flake8-docstrings = {version = "^1.7.0", optional = true}
-gradio = "^5.13.1"
+gradio = "^5.13.0"
 gradio_client = "^1.6.0"
 isort = {version = "^5.13.2", optional = true}
 mkdocs = {version = "^1.6.1", optional = true}
@@ -42,7 +42,7 @@ pre-commit = {version = "*", optional = true}
 pytest = {version = "^8.3.3", optional = true}
 pytest-cov = {version = "^5.0.0", optional = true}
 python = ">=3.10,<4.0"
-ruff = {version = "^0.6.2", optional = true}
+ruff = {version = "^0.9.3", optional = true}
 toml = {version = "*", optional = true}
 tox = {version = "^4.20.0", optional = true}
 twine = {version = "*", optional = true}
