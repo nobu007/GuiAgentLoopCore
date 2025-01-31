@@ -1020,6 +1020,19 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "jwt"
+version = "1.3.1"
+description = "JSON Web Token library for Python 3."
+optional = true
+python-versions = ">= 3.6"
+files = [
+    {file = "jwt-1.3.1-py3-none-any.whl", hash = "sha256:61c9170f92e736b530655e75374681d4fcca9cfa8763ab42be57353b2b203494"},
+]
+
+[package.dependencies]
+cryptography = ">=3.1,<3.4.0 || >3.4.0"
+
+[[package]]
 name = "keyring"
 version = "25.6.0"
 description = "Store and access your passwords safely."
@@ -3000,11 +3013,11 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 type = ["pytest-mypy"]
 
 [extras]
-dev = ["bump2version", "pip", "pre-commit", "toml", "tox", "twine", "virtualenv"]
+dev = ["bump2version", "pip", "pre-commit", "toml", "tox", "twine"]
 doc = ["mkdocs", "mkdocs-autorefs", "mkdocs-include-markdown-plugin", "mkdocs-material", "mkdocs-material-extensions", "mkdocstrings"]
 test = ["flake8", "flake8-docstrings", "isort", "mypy", "pytest", "pytest-cov"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "857fde5fb2ddaa2a8b4729cbf2fc75238f599237ef979ae1323dfa45bc24471b"
+content-hash = "faca94b28807a60f4011acaaf8c5d0f4ad5a6b942f4ee3a40b1d23b3789ef864"
