@@ -41,6 +41,7 @@ def _create_interface_chat(interpreter_manager: InterpreterManager):
         )
         chat_iface = gr.ChatInterface(
             fn=interpreter_manager.chat_gradio_like,
+            type='messages',
             title="Chatbot",
             description=f"チャットボット({agent_name})との会話",
             theme="soft",
