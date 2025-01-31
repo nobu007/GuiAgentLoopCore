@@ -46,6 +46,7 @@ ruff = {version = "^0.9.3", optional = true}
 toml = {version = "*", optional = true}
 tox = {version = "^4.24.1", optional = true}
 twine = {version = "*", optional = true}
+jwt = {version = "*", optional = true}
 
 [tool.poetry.extras]
 test = [
