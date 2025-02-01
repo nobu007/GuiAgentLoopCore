@@ -57,6 +57,9 @@ def extract_imports(content):
     except SyntaxError:
         logger.error(f"Syntax error in Python file")
         return []
+    except Exception as e:
+        logger.error(f"Unexpected error while parsing Python file: {str(e)}")
+        return []
 
 
 @app.get("/")
