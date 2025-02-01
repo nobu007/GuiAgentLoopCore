@@ -30,11 +30,10 @@ def sandbox_server(interpreter_manager: InterpreterManager):
             else:
                 return AgentName.AGENT_EXECUTOR.value
 
-        app.load(
+        agent_name.change(
             fn=_change_agent,
             inputs=[agent_name],
             outputs=[agent_name_radio],
-            every=3,
         )
 
     app.queue()
