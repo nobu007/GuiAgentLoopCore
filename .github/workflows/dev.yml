@@ -37,6 +37,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry tox tox-gh-actions
           poetry install --extras dev
+          poetry add selenium
+          poetry add webdriver-manager
+
+      - name: Set up ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+
+      - name: Set display environment variable(for ubuntu)
+        if: runner.os == 'Linux'
+        run: export DISPLAY=:99
 
       - name: test with tox
         run:
