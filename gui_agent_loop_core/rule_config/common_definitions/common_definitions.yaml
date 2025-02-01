@@ -1,0 +1,14 @@
+common_elements:
+  - name: commonLabel
+    type: label
+    description: "共通ラベル"
+    required: true
+    attributes:
+      for: "commonInput"
+
+  - name: commonRadio
+    type: radio
+    description: "共通ラジオボタン"
+    required: false
+    attributes:
+      name: "commonOptions"

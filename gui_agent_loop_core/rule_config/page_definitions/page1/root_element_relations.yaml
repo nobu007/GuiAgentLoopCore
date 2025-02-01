@@ -1,0 +1,7 @@
+root_element_relations:
+  - source: "FormA"
+    target: "FormB"
+    condition: "exists"  # FormAが存在する場合にFormBをチェック
+  - source: "FormC"
+    target: "commonLabel"
+    condition: "uses_common"  # FormCが共通ラベルを使用する場合

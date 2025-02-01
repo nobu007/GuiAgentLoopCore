@@ -1,0 +1,37 @@
+root_element:
+  name: "FormA"
+  type: "form"
+  description: "このフォームはラベルとラジオボタンの関係を定義します。"
+  attributes:
+    action: "/submit"
+    method: "post"
+  elements:
+    - name: AAA
+      type: label
+      description: "このラベルは必須です。"
+      required: true
+      attributes:
+        for: "input1"
+      check:
+        condition: "every"
+        target: "label"
+
+    - name: BBB
+      type: radio
+      description: "このラジオボタンはオプションです。"
+      required: false
+      attributes:
+        id: "input1"
+        name: "options"
+      prohibited: false
+      check:
+        condition: "first_only"
+        target: "radio"
+
+    - name: commonLabel
+      type: label
+      description: "共通ラベルを使用しています。"
+      required: true
+      attributes:
+        for: "commonInput"
+      uses_common: true  # 共通要素を使用することを明示
