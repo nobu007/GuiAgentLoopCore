@@ -25,10 +25,7 @@ def sandbox_server(interpreter_manager: InterpreterManager):
 
         def _change_agent(agent_name):
             print("_change_agent agent_name=", agent_name)
-            if agent_name == AgentName.AGENT_EXECUTOR.value:
-                return AgentName.SUPERVISOR.value
-            else:
-                return AgentName.AGENT_EXECUTOR.value
+            return AgentName.SUPERVISOR.value if agent_name == AgentName.AGENT_EXECUTOR.value else AgentName.AGENT_EXECUTOR.value
 
         app.load(
             fn=_change_agent,

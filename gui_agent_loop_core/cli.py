@@ -23,7 +23,13 @@ class DummyInterpreter(GuiAgentInterpreterBase):
         stream: bool = False,
         blocking: bool = False,
     ) -> GuiAgentInterpreterChatResponseAny:
-        content_res = request_core.content + "\ndisplay=" + display + "stream=" + stream + "blocking=" + blocking
+        content_res = (
+            f"{request_core.content}\n"
+            f"display={display}\n"
+            f"stream={stream}\n"
+            f"blocking={blocking}\n"
+            f"dummy_response=This is a dummy response for testing purposes."
+        )
         response = GuiAgentInterpreterChatResponse(content=content_res)
         return response
 
