@@ -74,6 +74,53 @@ def test_create_interface_chat(mock_get_components, mock_interpreter_manager):
     # Additional assertions can be added here for specific component properties
 
 
+# Integration test for Gradio UI interactions
+def test_gradio_ui_interactions(mock_interpreter_manager):
+    app, chat_iface, chatbot = _create_interface_chat(mock_interpreter_manager)
+
+    # Simulate user interaction
+    user_message = "Hello, how are you?"
+    history = []
+    response = list(mock_interpreter_manager.chat_gradio_like(user_message, history))
+
+    # Assert the response
+    assert response == ["test_response"]
+    assert history == [{"role": "user", "content": user_message}, {"role": "assistant", "content": "test_response"}]
+
+
+# Test for streaming response from LLM
+def test_streaming_response_from_llm(mock_interpreter_manager):
+    app, chat_iface, chatbot = _create_interface_chat(mock_interpreter_manager)
+
+    # Simulate streaming response
+    user_message = "Stream this response"
+    history = []
+    response_stream = mock_interpreter_manager.chat(user_message, is_auto=False)
+
+    # Collect the streaming response
+    response = []
+    for chunk in response_stream:
+        response.append(chunk)
+
+    # Assert the response
+    assert response == ["test_response"]
+    assert history == [{"role": "user", "content": user_message}, {"role": "assistant", "content": "test_response"}]
+
+
+# Test for synchronous response from LLM
+def test_synchronous_response_from_llm(mock_interpreter_manager):
+    app, chat_iface, chatbot = _create_interface_chat(mock_interpreter_manager)
+
+    # Simulate synchronous response
+    user_message = "Give me a synchronous response"
+    history = []
+    response = list(mock_interpreter_manager.chat(user_message, is_auto=False))
+
+    # Assert the response
+    assert response == ["test_response"]
+    assert history == [{"role": "user", "content": user_message}, {"role": "assistant", "content": "test_response"}]
+
+
 def main():
     """Test runner function for local testing"""
     pytest.main([__file__, '-v'])

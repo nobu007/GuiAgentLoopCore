@@ -13,7 +13,7 @@ from gui_agent_loop_core.schema.message.schema import (
 )
 
 
-def sandbox_server(interpreter_manager: InterpreterManager):
+def sandbox_server(interpreter_manager: InterpreterManager, test_mode: bool = False):
     with gr.Blocks() as app:
         component_dict = get_gui_common_component(GuiBackendType.GRADIO, interpreter_manager.create_session_instance())
         agent_name = component_dict[GuiComponentName.AGENT_NAME]
@@ -36,8 +36,11 @@ def sandbox_server(interpreter_manager: InterpreterManager):
             outputs=[agent_name_radio],
         )
 
-    app.queue()
-    app.launch(server_name="0.0.0.0", debug=True)
+    if not test_mode:
+        app.queue()
+        app.launch(server_name="0.0.0.0", debug=True)
+    else:
+        return app
 
 
 class DummyGuiAgentInterpreter(GuiAgentInterpreterABC):
